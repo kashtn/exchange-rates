@@ -3,7 +3,16 @@ import "antd/dist/antd.css";
 import { useState, useEffect } from "react";
 import { Table, Button, Form, Input, Modal, Popover } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { startGetting, setCurrentDate, filterRates } from "../../redux/actions";
+import {
+  startGetting,
+  setCurrentDate,
+  setFilter,
+  filterToHighest,
+  filterToLowest,
+  cleanFilter,
+  alphabetFilter,
+  setCompareRates,
+} from "../../redux/actions";
 
 const { Search } = Input;
 
@@ -17,51 +26,22 @@ function TableCard() {
   const currentDate = useSelector((state) => state.currentDate);
   const currentCompareDate = useSelector((state) => state.currentCompareDate);
   const loading = useSelector((state) => state.loading);
+  const filter = useSelector((state) => state.filter);
 
-  const [compareRates, setCompareRates] = useState(false);
-  const [compareFlag, setCompareFlag] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [filter, setFilter] = useState();
-  // const [localRates, setLocalRates] = useState();
-  // const [localCompareRates, setLocalCompareRates] = useState();
-  // let localRates = reduxRÎates
-  // console.log(localRates);
+  const [compareFlag, setCompareFlag] = useState(false);
 
+  useEffect(() => {
+    if (filter === "toLowest") {
+      dispatch(filterToLowest());
+    } else if (filter === "toHighest") {
+      dispatch(filterToHighest());
+    }
+  }, [dispatch, filter]);
 
   useEffect(() => {
     dispatch(startGetting(""));
   }, [dispatch]);
-
-//TODO: фильтрует но не запускает перерендер элемента
-
-  let localRates = filter
-    ? reduxRates.sort((a, b) => {
-        let firstRate = Number(a.Value.split(",").join("."));
-        let secondRate = Number(b.Value.split(",").join("."));
-        console.log(filter);
-        if (filter === "toHighest") {
-          return firstRate - secondRate;
-        } else if (filter === "toLowest") {
-          return secondRate - firstRate;
-        }
-        else {
-          console.log('else');
-          return [...reduxRates]
-        }
-      })
-    : reduxRates;
-    console.log(localRates);
-    
-
-  //   console.log(localRates);
-  //   return localRates
-  // }else if (filter === 'toHighest'){
-  //   return localRates = reduxRates.sort((a, b) => {
-  //     let firstRate = Number(a.Value.split(",").join("."));
-  //     let secondRate = Number(b.Value.split(",").join("."));
-  //     return firstRate - secondRate;
-  //   });
-  // }else return reduxRates
 
   const content = (
     <>
@@ -70,7 +50,7 @@ function TableCard() {
           type="link"
           className="filterBtn"
           onClick={() => {
-            setFilter("toLowest");
+            dispatch(setFilter("toLowest"));
           }}
         >
           Фильтр по убыванию
@@ -81,10 +61,22 @@ function TableCard() {
           type="link"
           className="filterBtn"
           onClick={() => {
-            setFilter("toHighest");
+            dispatch(setFilter("toHighest"));
           }}
         >
           Фильтр по возрастанию
+        </Button>
+      </div>
+      <div>
+        <Button
+          type="link"
+          className="filterBtn"
+          onClick={() => {
+            dispatch(cleanFilter());
+            dispatch(alphabetFilter());
+          }}
+        >
+          Фильтр по алфавиту
         </Button>
       </div>
     </>
@@ -93,37 +85,37 @@ function TableCard() {
   const columns = [
     {
       title: "Валюта",
-      // <Popover content={content}>
-      //   <Button type="link">Валюта</Button>
-      // </Popover>
       dataIndex: "CharCode",
     },
     {
-      title: (
-        <Popover content={content}>
-          <Button type="link">Курс</Button>
-        </Popover>
-      ),
+      title: "Курс",
       dataIndex: "Value",
     },
   ];
 
   function onSearch(value) {
+    dispatch(cleanFilter());
     if (value.match(checker)) {
       setVisible(true);
       setCompareFlag(false);
-      setCompareRates(false);
       dispatch(startGetting("?date_req=" + value));
       dispatch(setCurrentDate(value));
+      dispatch(setCompareRates(""));
     } else {
       Modal.error({
-        title: "Некорректный ввод дат!",
+        title: "Некорректный ввод даты!",
       });
     }
   }
 
   async function compare(values) {
-    if (values.date1.match(checker) && values.date2.match(checker)) {
+    dispatch(cleanFilter());
+    if (
+      values.date1 &&
+      values.date2 &&
+      values.date1.match(checker) &&
+      values.date2.match(checker)
+    ) {
       setVisible(false);
       dispatch(
         startGetting("?date_req=" + values.date1, "?date_req=" + values.date2)
@@ -137,7 +129,7 @@ function TableCard() {
   }
 
   async function saveRates() {
-    if (compareRates) {
+    if (reduxCompareRates) {
       console.log("both");
       const data = {
         date1: reduxRates,
@@ -174,28 +166,6 @@ function TableCard() {
     }
   }
 
-  // function filter(type) {
-  //   // setLocalRates(reduxRates);
-  //   // setLocalCompareRates(reduxCompareRates);
-  //   // console.log(localRates);
-  //   if (type === "toLowest") {
-  //     // dispatch(filterRates(reduxRates))
-  //     let ratesArr = localRates.sort((a, b) => {
-  //       let firstRate = Number(a.Value.split(",").join("."));
-  //       let secondRate = Number(b.Value.split(",").join("."));
-  //       return secondRate - firstRate;
-  //     });
-  //     console.log("To lowest>>>", ratesArr);
-  //   } else if (type === "toHighest") {
-  //     let ratesArr = localRates.sort((a, b) => {
-  //       let firstRate = Number(a.Value.split(",").join("."));
-  //       let secondRate = Number(b.Value.split(",").join("."));
-  //       return firstRate - secondRate;
-  //     });
-  //     console.log("To Highest>>>", ratesArr);
-  //   }
-  // }
-
   return (
     <>
       <div className="main">
@@ -205,6 +175,8 @@ function TableCard() {
             type="primary"
             onClick={() => {
               dispatch(startGetting(""));
+              dispatch(cleanFilter());
+              dispatch(setCompareRates(""));
               setVisible(true);
             }}
           >
@@ -241,13 +213,21 @@ function TableCard() {
           {loading && <div className="loader"></div>}
         </div>
         {visible && (
-          <div className="table">
-            <h4>{currentDate}</h4>
-            <Table columns={columns} dataSource={localRates && localRates} />
-          </div>
+          <>
+            <Popover content={content}>
+              <Button type="link">Фильтровать</Button>
+            </Popover>
+            <div className="table">
+              <h4>{currentDate}</h4>
+              <Table columns={columns} dataSource={reduxRates && reduxRates} />
+            </div>
+          </>
         )}
         {compareFlag && (
           <>
+            <Popover content={content}>
+              <Button type="link">Фильтровать</Button>
+            </Popover>
             <div className="compareTable">
               <div></div>
               <div className="table">

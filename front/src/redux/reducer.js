@@ -5,6 +5,11 @@ import {
   SET_CURRENT_DATE,
   GET_COMPARE_RATES,
   SET_CURRENT_COMPARE_DATE,
+  SET_FILTER,
+  TO_HIGHEST,
+  TO_LOWEST,
+  CLEAN_FILTER,
+  ALPHABET_FILTER,
 } from "./actionTypes";
 
 let initialState = {
@@ -13,6 +18,7 @@ let initialState = {
   compareRates: [],
   currentDate: "",
   currentCompareDate: "",
+  filter: "",
 };
 
 export default function reducer(state = initialState, action) {
@@ -46,6 +52,78 @@ export default function reducer(state = initialState, action) {
       return {
         ...state,
         currentCompareDate: action.payload,
+      };
+    case SET_FILTER:
+      return {
+        ...state,
+        filter: action.payload,
+      };
+    case TO_HIGHEST:
+      return {
+        ...state,
+        rates: [
+          ...state.rates.sort((a, b) => {
+            let firstRate = Number(a.Value.split(",").join("."));
+            let secondRate = Number(b.Value.split(",").join("."));
+            return firstRate - secondRate;
+          }),
+        ],
+        compareRates: [
+          ...state.compareRates.sort((a, b) => {
+            let firstRate = Number(a.Value.split(",").join("."));
+            let secondRate = Number(b.Value.split(",").join("."));
+            return firstRate - secondRate;
+          }),
+        ],
+      };
+    case TO_LOWEST:
+      return {
+        ...state,
+        rates: [
+          ...state.rates.sort((a, b) => {
+            let firstRate = Number(a.Value.split(",").join("."));
+            let secondRate = Number(b.Value.split(",").join("."));
+            return secondRate - firstRate;
+          }),
+        ],
+        compareRates: [
+          ...state.compareRates.sort((a, b) => {
+            let firstRate = Number(a.Value.split(",").join("."));
+            let secondRate = Number(b.Value.split(",").join("."));
+            return secondRate - firstRate;
+          }),
+        ],
+      };
+    case ALPHABET_FILTER:
+      return {
+        ...state,
+        rates: [
+          ...state.rates.sort((a, b) => {
+            if (a.CharCode < b.CharCode) {
+              return -1;
+            }
+            if (a.CharCode > b.CharCode) {
+              return 1;
+            }
+            return 0;
+          }),
+        ],
+        compareRates: [
+          ...state.compareRates.sort((a, b) => {
+            if (a.CharCode < b.CharCode) {
+              return -1;
+            }
+            if (a.CharCode > b.CharCode) {
+              return 1;
+            }
+            return 0;
+          }),
+        ],
+      };
+    case CLEAN_FILTER:
+      return {
+        ...state,
+        filter: "",
       };
     default:
       return state;

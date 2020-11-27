@@ -5,6 +5,11 @@ import {
   GET_COMPARE_RATES,
   SET_CURRENT_DATE,
   SET_CURRENT_COMPARE_DATE,
+  SET_FILTER,
+  TO_HIGHEST,
+  TO_LOWEST,
+  CLEAN_FILTER,
+  ALPHABET_FILTER,
 } from "./actionTypes";
 
 export function startGetting(date1, date2) {
@@ -118,6 +123,33 @@ export function setCurrentCompareDate(date) {
   };
 }
 
-export function filterRates(ratesFromFront){
-  
+export function setFilter(type) {
+  return {
+    type: SET_FILTER,
+    payload: type,
+  };
+}
+
+export function filterToLowest() {
+  return {
+    type: TO_LOWEST,
+  };
+}
+
+export function filterToHighest() {
+  return {
+    type: TO_HIGHEST,
+  };
+}
+
+export function cleanFilter() {
+  return {
+    type: CLEAN_FILTER,
+  };
+}
+
+export function alphabetFilter() {
+  return {
+    type: ALPHABET_FILTER,
+  };
 }
