@@ -1,0 +1,31 @@
+.main {
+  margin: 0 auto;
+  text-align: center;
+  max-width: 1000px;
+}
+.dateForm {
+  max-width: 300px;
+  margin: 20px auto;
+  padding-bottom: 10px;
+}
+.table {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  width: 250px;
+  border: 1px solid #f0f0f0;
+  padding: 5px;
+  border-radius: 2px;
+}
+.compareTable{
+  display: flex;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 2s linear infinite;
+}
