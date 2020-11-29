@@ -53,9 +53,10 @@ function xmlToJson(xml) {
   return obj;
 }
 
-export function startGetting(date1, date2, dynamic, currencyId) {
+export function startGetting(date1, date2) {
   return async function (dispatch) {
     dispatch(startLoading());
+
     const url = `http://www.cbr.ru/scripts/XML_daily.asp${date1}`;
     const response = await fetch("http://localhost:8080/" + url);
     const result = await response.text();
@@ -80,14 +81,6 @@ export function startGetting(date1, date2, dynamic, currencyId) {
         .join("/");
       dispatch(setCurrentCompareDate(currentDate));
     }
-
-    if (dynamic) {
-      const url = `http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=${date1}&date_req2=${date2}&VAL_NM_RQ=${currencyId}`;
-      const response = await fetch("http://localhost:8080/" + url);
-      const result = await response.text();
-      const XmlNode = new DOMParser().parseFromString(result, "text/xml");
-      console.log(xmlToJson(XmlNode).ValCurs.Record);
-    }
   };
 }
 
@@ -98,7 +91,6 @@ export function getDynamic(currencyId, date1, date2) {
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const records = xmlToJson(XmlNode).ValCurs.Record;
-    console.log(records);
     let allValues =
       records &&
       records.map((rate) => {
@@ -106,11 +98,10 @@ export function getDynamic(currencyId, date1, date2) {
         let correctDate = dateOfRate.split(".");
         [correctDate[0], correctDate[1]] = [correctDate[1], correctDate[0]];
         return {
-          x: correctDate.join(''),
+          x: new Date(correctDate.join(".")),
           y: Number(rate.Value.split(",").join(".")),
         };
       });
-    console.log(allValues);
     dispatch(setDynamicValues(allValues));
   };
 }
