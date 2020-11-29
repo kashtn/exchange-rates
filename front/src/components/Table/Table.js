@@ -12,7 +12,10 @@ import {
   cleanFilter,
   alphabetFilter,
   setCompareRates,
+  getDynamic,
+  setDynamicValues,
 } from "../../redux/actions";
+import Graph from "../Graph/Graph";
 
 const { Search } = Input;
 
@@ -27,6 +30,8 @@ function TableCard() {
   const currentCompareDate = useSelector((state) => state.currentCompareDate);
   const loading = useSelector((state) => state.loading);
   const filter = useSelector((state) => state.filter);
+  const dynamicValues = useSelector((state) => state.dynamicValues);
+  console.log("Dynamic>>>", dynamicValues);
 
   const [visible, setVisible] = useState(false);
   const [compareFlag, setCompareFlag] = useState(false);
@@ -41,6 +46,7 @@ function TableCard() {
 
   useEffect(() => {
     dispatch(startGetting(""));
+    dispatch(getDynamic()); //для проверки
   }, [dispatch]);
 
   const content = (
@@ -82,10 +88,31 @@ function TableCard() {
     </>
   );
 
+  function findDynamic(e) {
+    console.log(e.target.innerText);
+    const currencyName = e.target.innerText;
+    const currencyId = reduxRates.find(
+      (currency) => currency.CharCode === currencyName
+    );
+    const id = Object.values(currencyId["@attributes"])[0];
+    console.log(id);
+    dispatch(getDynamic(id, currentDate, currentCompareDate));
+  }
+
   const columns = [
     {
       title: "Валюта",
       dataIndex: "CharCode",
+      render: (text) => (
+        <Button
+          type="link"
+          onClick={(e) => {
+            findDynamic(e);
+          }}
+        >
+          {text}
+        </Button>
+      ),
     },
     {
       title: "Курс",
@@ -223,6 +250,7 @@ function TableCard() {
             </div>
           </>
         )}
+        {dynamicValues && dynamicValues.length > 0 && <Graph />}
         {compareFlag && (
           <>
             <Popover content={content}>
@@ -237,7 +265,6 @@ function TableCard() {
                   dataSource={reduxRates && reduxRates}
                 />
               </div>
-              <div></div>
               <div className="table">
                 <h4>{currentCompareDate}</h4>
                 <Table

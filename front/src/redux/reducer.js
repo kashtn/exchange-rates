@@ -10,6 +10,7 @@ import {
   TO_LOWEST,
   CLEAN_FILTER,
   ALPHABET_FILTER,
+  SET_DYNAMIC_VALUES,
 } from "./actionTypes";
 
 let initialState = {
@@ -19,6 +20,7 @@ let initialState = {
   currentDate: "",
   currentCompareDate: "",
   filter: "",
+  dynamicValues: [],
 };
 
 export default function reducer(state = initialState, action) {
@@ -124,6 +126,11 @@ export default function reducer(state = initialState, action) {
       return {
         ...state,
         filter: "",
+      };
+    case SET_DYNAMIC_VALUES:
+      return {
+        ...state,
+        dynamicValues: action.payload,
       };
     default:
       return state;

@@ -8,4 +8,5 @@ export const SET_FILTER = "SET_FILTER";
 export const TO_LOWEST = "TO_LOWEST";
 export const TO_HIGHEST = "TO_HIGHEST";
 export const CLEAN_FILTER = "CLEAN_FILTER";
-export const ALPHABET_FILTER = "ALPHABET_FILTER"
+export const ALPHABET_FILTER = "ALPHABET_FILTER";
+export const SET_DYNAMIC_VALUES = "SET_DYNAMIC_VALUES";

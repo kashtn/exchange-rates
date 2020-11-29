@@ -10,57 +10,59 @@ import {
   TO_LOWEST,
   CLEAN_FILTER,
   ALPHABET_FILTER,
+  SET_DYNAMIC_VALUES,
 } from "./actionTypes";
 
-export function startGetting(date1, date2) {
-  function xmlToJson(xml) {
-    var obj = {};
+function xmlToJson(xml) {
+  var obj = {};
 
-    if (xml.nodeType === 1) {
-      if (xml.attributes.length > 0) {
-        obj["@attributes"] = {};
-        for (var j = 0; j < xml.attributes.length; j++) {
-          var attribute = xml.attributes.item(j);
-          obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
-        }
-      }
-    } else if (xml.nodeType === 3) {
-      obj = xml.nodeValue;
-    }
-    var textNodes = [].slice.call(xml.childNodes).filter(function (node) {
-      return node.nodeType === 3;
-    });
-    if (xml.hasChildNodes() && xml.childNodes.length === textNodes.length) {
-      obj = [].slice.call(xml.childNodes).reduce(function (text, node) {
-        return text + node.nodeValue;
-      }, "");
-    } else if (xml.hasChildNodes()) {
-      for (var i = 0; i < xml.childNodes.length; i++) {
-        var item = xml.childNodes.item(i);
-        var nodeName = item.nodeName;
-        if (typeof obj[nodeName] == "undefined") {
-          obj[nodeName] = xmlToJson(item);
-        } else {
-          if (typeof obj[nodeName].push == "undefined") {
-            var old = obj[nodeName];
-            obj[nodeName] = [];
-            obj[nodeName].push(old);
-          }
-          obj[nodeName].push(xmlToJson(item));
-        }
+  if (xml.nodeType === 1) {
+    if (xml.attributes.length > 0) {
+      obj["@attributes"] = {};
+      for (var j = 0; j < xml.attributes.length; j++) {
+        var attribute = xml.attributes.item(j);
+        obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
       }
     }
-    return obj;
+  } else if (xml.nodeType === 3) {
+    obj = xml.nodeValue;
   }
+  var textNodes = [].slice.call(xml.childNodes).filter(function (node) {
+    return node.nodeType === 3;
+  });
+  if (xml.hasChildNodes() && xml.childNodes.length === textNodes.length) {
+    obj = [].slice.call(xml.childNodes).reduce(function (text, node) {
+      return text + node.nodeValue;
+    }, "");
+  } else if (xml.hasChildNodes()) {
+    for (var i = 0; i < xml.childNodes.length; i++) {
+      var item = xml.childNodes.item(i);
+      var nodeName = item.nodeName;
+      if (typeof obj[nodeName] == "undefined") {
+        obj[nodeName] = xmlToJson(item);
+      } else {
+        if (typeof obj[nodeName].push == "undefined") {
+          var old = obj[nodeName];
+          obj[nodeName] = [];
+          obj[nodeName].push(old);
+        }
+        obj[nodeName].push(xmlToJson(item));
+      }
+    }
+  }
+  return obj;
+}
+
+export function startGetting(date1, date2, dynamic, currencyId) {
   return async function (dispatch) {
     dispatch(startLoading());
     const url = `http://www.cbr.ru/scripts/XML_daily.asp${date1}`;
-    let response = await fetch("http://localhost:8080/" + url);
-    let result = await response.text();
-    let XmlNode = new DOMParser().parseFromString(result, "text/xml");
-    let rates = xmlToJson(XmlNode).ValCurs.Valute;
+    const response = await fetch("http://localhost:8080/" + url);
+    const result = await response.text();
+    const XmlNode = new DOMParser().parseFromString(result, "text/xml");
+    const rates = xmlToJson(XmlNode).ValCurs.Valute;
     dispatch(setRates(rates));
-    let currentDate = xmlToJson(XmlNode)
+    const currentDate = xmlToJson(XmlNode)
       .ValCurs["@attributes"].Date.split(".")
       .join("/");
     dispatch(setCurrentDate(currentDate));
@@ -68,16 +70,48 @@ export function startGetting(date1, date2) {
 
     if (date2 && date2.length > 0) {
       const url = `http://www.cbr.ru/scripts/XML_daily.asp${date2}`;
-      let response = await fetch("http://localhost:8080/" + url);
-      let result = await response.text();
-      let XmlNode = new DOMParser().parseFromString(result, "text/xml");
-      let rates = xmlToJson(XmlNode).ValCurs.Valute;
+      const response = await fetch("http://localhost:8080/" + url);
+      const result = await response.text();
+      const XmlNode = new DOMParser().parseFromString(result, "text/xml");
+      const rates = xmlToJson(XmlNode).ValCurs.Valute;
       dispatch(setCompareRates(rates));
-      let currentDate = xmlToJson(XmlNode)
+      const currentDate = xmlToJson(XmlNode)
         .ValCurs["@attributes"].Date.split(".")
         .join("/");
       dispatch(setCurrentCompareDate(currentDate));
     }
+
+    if (dynamic) {
+      const url = `http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=${date1}&date_req2=${date2}&VAL_NM_RQ=${currencyId}`;
+      const response = await fetch("http://localhost:8080/" + url);
+      const result = await response.text();
+      const XmlNode = new DOMParser().parseFromString(result, "text/xml");
+      console.log(xmlToJson(XmlNode).ValCurs.Record);
+    }
+  };
+}
+
+export function getDynamic(currencyId, date1, date2) {
+  return async function (dispatch) {
+    const url = `http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=${date1}&date_req2=${date2}&VAL_NM_RQ=${currencyId}`;
+    const response = await fetch("http://localhost:8080/" + url);
+    const result = await response.text();
+    const XmlNode = new DOMParser().parseFromString(result, "text/xml");
+    const records = xmlToJson(XmlNode).ValCurs.Record;
+    console.log(records);
+    let allValues =
+      records &&
+      records.map((rate) => {
+        let dateOfRate = Object.values(rate["@attributes"])[0];
+        let correctDate = dateOfRate.split(".");
+        [correctDate[0], correctDate[1]] = [correctDate[1], correctDate[0]];
+        return {
+          x: correctDate.join(''),
+          y: Number(rate.Value.split(",").join(".")),
+        };
+      });
+    console.log(allValues);
+    dispatch(setDynamicValues(allValues));
   };
 }
 
@@ -151,5 +185,12 @@ export function cleanFilter() {
 export function alphabetFilter() {
   return {
     type: ALPHABET_FILTER,
+  };
+}
+
+export function setDynamicValues(allValues) {
+  return {
+    type: SET_DYNAMIC_VALUES,
+    payload: allValues,
   };
 }
