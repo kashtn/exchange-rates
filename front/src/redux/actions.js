@@ -66,8 +66,10 @@ export function startGetting(date1, date2) {
     const currentDate = xmlToJson(XmlNode)
       .ValCurs["@attributes"].Date.split(".")
       .join("/");
-    dispatch(setCurrentDate(currentDate));
-    dispatch(finishLoading());
+    setTimeout(async () => {
+      dispatch(setCurrentDate(currentDate));
+      dispatch(finishLoading());
+    }, 500);
 
     if (date2 && date2.length > 0) {
       const url = `http://www.cbr.ru/scripts/XML_daily.asp${date2}`;

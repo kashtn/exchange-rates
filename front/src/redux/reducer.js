@@ -71,11 +71,13 @@ export default function reducer(state = initialState, action) {
           }),
         ],
         compareRates: [
-          ...state.compareRates.sort((a, b) => {
-            let firstRate = Number(a.Value.split(",").join("."));
-            let secondRate = Number(b.Value.split(",").join("."));
-            return firstRate - secondRate;
-          }),
+          ...(state.compareRates.length > 0
+            ? state.compareRates.sort((a, b) => {
+                let firstRate = Number(a.Value.split(",").join("."));
+                let secondRate = Number(b.Value.split(",").join("."));
+                return firstRate - secondRate;
+              })
+            : ""),
         ],
       };
     case TO_LOWEST:
@@ -89,11 +91,13 @@ export default function reducer(state = initialState, action) {
           }),
         ],
         compareRates: [
-          ...state.compareRates.sort((a, b) => {
-            let firstRate = Number(a.Value.split(",").join("."));
-            let secondRate = Number(b.Value.split(",").join("."));
-            return secondRate - firstRate;
-          }),
+          ...(state.compareRates.length > 0
+            ? state.compareRates.sort((a, b) => {
+                let firstRate = Number(a.Value.split(",").join("."));
+                let secondRate = Number(b.Value.split(",").join("."));
+                return secondRate - firstRate;
+              })
+            : ""),
         ],
       };
     case ALPHABET_FILTER:

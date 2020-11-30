@@ -43,10 +43,6 @@ function TableCard() {
     }
   }, [dispatch, filter]);
 
-  useEffect(() => {
-    dispatch(startGetting(""));
-  }, [dispatch]);
-
   const content = (
     <>
       <div>
@@ -86,20 +82,27 @@ function TableCard() {
     </>
   );
 
+  const dynamicContent = (
+    <div>
+      <p>Показать динамику</p>
+    </div>
+  );
+
   const columns = [
     {
       title: "Валюта",
       dataIndex: "CharCode",
       render: (text) => (
-        <Button
-          type="link"
-          onClick={(e) => {
-            findDynamic(e);
-            setDynamicFlag(true);
-          }}
-        >
-          {text}
-        </Button>
+        <Popover content={dynamicContent}>
+          <Button
+            type="link"
+            onClick={(e) => {
+              findDynamic(e);
+            }}
+          >
+            {text}
+          </Button>
+        </Popover>
       ),
     },
     {
@@ -109,13 +112,26 @@ function TableCard() {
   ];
 
   function findDynamic(e) {
-    setCurrentCharCode(e.target.innerText);
-    const currencyName = e.target.innerText;
-    const currencyId = reduxRates.find(
-      (currency) => currency.CharCode === currencyName
-    );
-    const id = Object.values(currencyId["@attributes"])[0];
-    dispatch(getDynamic(id, currentDate, currentCompareDate));
+    if (!visible) {
+      setCurrentCharCode(e.target.innerText);
+      const currencyName = e.target.innerText;
+      try {
+        const currencyId = reduxRates.find(
+          (currency) => currency.CharCode === currencyName
+        );
+        const id = Object.values(currencyId["@attributes"])[0];
+        dispatch(getDynamic(id, currentDate, currentCompareDate));
+        setDynamicFlag(true);
+      } catch (err) {
+        Modal.error({
+          title: "Невозможно показать динамику данной валюты!",
+        });
+      }
+    } else {
+      Modal.error({
+        title: "Не задан период!",
+      });
+    }
   }
 
   function onSearch(value) {
@@ -126,10 +142,10 @@ function TableCard() {
       setCompareFlag(false);
       dispatch(startGetting("?date_req=" + value));
       dispatch(setCurrentDate(value));
-      dispatch(setCompareRates(""));
+      dispatch(setCompareRates([]));
     } else {
       Modal.error({
-        title: "Некорректный ввод даты!",
+        title: "Некорректный ввод!",
       });
     }
   }
@@ -150,7 +166,7 @@ function TableCard() {
       setCompareFlag(true);
     } else {
       Modal.error({
-        title: "Некорректный ввод дат!",
+        title: "Некорректный ввод!",
       });
     }
   }
@@ -201,9 +217,10 @@ function TableCard() {
             onClick={() => {
               dispatch(startGetting(""));
               dispatch(cleanFilter());
-              dispatch(setCompareRates(""));
+              dispatch(setCompareRates([]));
               setVisible(true);
               setDynamicFlag(false);
+              setCompareFlag(false);
             }}
           >
             Показать на сегодня
@@ -236,9 +253,9 @@ function TableCard() {
             </Form.Item>
             <Button htmlType="submit">Сравнить</Button>
           </Form>
-          {loading && <div className="loader"></div>}
         </div>
-        {visible && (
+        {loading && <div className="loader"></div>}
+        {!loading && visible && (
           <>
             <Popover content={content}>
               <Button type="link">Фильтровать</Button>
@@ -250,7 +267,7 @@ function TableCard() {
           </>
         )}
         {dynamicFlag && <Graph charCode={currentCharCode} />}
-        {compareFlag && (
+        {!loading && compareFlag && (
           <>
             <Popover content={content}>
               <Button type="link">Фильтровать</Button>
@@ -264,7 +281,6 @@ function TableCard() {
                   dataSource={reduxRates && reduxRates}
                 />
               </div>
-
               <div className="table">
                 <h4>{currentCompareDate}</h4>
                 <Table
@@ -275,7 +291,7 @@ function TableCard() {
             </div>
           </>
         )}
-        {(visible || compareFlag) && (
+        {!loading && (visible || compareFlag) && (
           <Button type="primary" onClick={saveRates}>
             Сохранить отчет
           </Button>
