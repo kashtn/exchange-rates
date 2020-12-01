@@ -2,6 +2,7 @@ import fs from "fs";
 import express from "express";
 import mongoose from "mongoose";
 import Day from "./models/Day.js";
+import {} from 'dotenv/config.js'
 
 let app = express();
 

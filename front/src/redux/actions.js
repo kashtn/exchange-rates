@@ -13,6 +13,8 @@ import {
   SET_DYNAMIC_VALUES,
   GET_CHARCODES,
 } from "./actionTypes";
+import dotenv from 'dotenv'
+dotenv.config()
 
 function xmlToJson(xml) {
   var obj = {};
@@ -59,7 +61,8 @@ export function startGetting(date1, date2) {
     dispatch(startLoading());
     const url = `http://www.cbr.ru/scripts/XML_daily.asp${date1}`;
     // const response = await fetch("http://localhost:8080/" + url);
-    const response = await fetch(process.env.URL + url);
+    console.log(process.env.URL);
+    const response = await fetch('http://localhost:8080/' + url);
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const rates = xmlToJson(XmlNode).ValCurs.Valute;
@@ -78,7 +81,7 @@ export function startGetting(date1, date2) {
 
     if (date2 && date2.length > 0) {
       const url = `http://www.cbr.ru/scripts/XML_daily.asp${date2}`;
-      const response = await fetch(process.env.URL + url);
+      const response = await fetch('https://cors-anywhere.herokuapp.com/' + url);
       const result = await response.text();
       const XmlNode = new DOMParser().parseFromString(result, "text/xml");
       const rates = xmlToJson(XmlNode).ValCurs.Valute;

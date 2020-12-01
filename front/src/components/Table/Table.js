@@ -260,7 +260,7 @@ function TableCard() {
   return (
     <>
       <div className="main">
-        <GetBase/>
+        {/* <GetBase/> */}
         <div>
           <h1>Курс Валют</h1>
           <Button
