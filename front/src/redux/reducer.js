@@ -11,6 +11,7 @@ import {
   CLEAN_FILTER,
   ALPHABET_FILTER,
   SET_DYNAMIC_VALUES,
+  GET_CHARCODES,
 } from "./actionTypes";
 
 let initialState = {
@@ -21,6 +22,7 @@ let initialState = {
   currentCompareDate: "",
   filter: "",
   dynamicValues: [],
+  charCodes: [],
 };
 
 export default function reducer(state = initialState, action) {
@@ -135,6 +137,11 @@ export default function reducer(state = initialState, action) {
       return {
         ...state,
         dynamicValues: action.payload,
+      };
+    case GET_CHARCODES:
+      return {
+        ...state,
+        charCodes: action.payload,
       };
     default:
       return state;

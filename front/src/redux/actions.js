@@ -11,6 +11,7 @@ import {
   CLEAN_FILTER,
   ALPHABET_FILTER,
   SET_DYNAMIC_VALUES,
+  GET_CHARCODES,
 } from "./actionTypes";
 
 function xmlToJson(xml) {
@@ -53,16 +54,29 @@ function xmlToJson(xml) {
   return obj;
 }
 
+export function getBase(){
+  let date = new Date().toJSON().slice(0,10).split('-')
+  date = [date[2], date[1], date[0]]
+  const today = date.join('/')
+  console.log(today);
+  return async () => {
+
+  }
+}
+
 export function startGetting(date1, date2) {
   return async function (dispatch) {
     dispatch(startLoading());
-
     const url = `http://www.cbr.ru/scripts/XML_daily.asp${date1}`;
     const response = await fetch("http://localhost:8080/" + url);
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const rates = xmlToJson(XmlNode).ValCurs.Valute;
     dispatch(setRates(rates));
+    const charCodes = rates.map((el) => {
+      return el.CharCode;
+    });
+    dispatch(getCharCodes(charCodes));
     const currentDate = xmlToJson(XmlNode)
       .ValCurs["@attributes"].Date.split(".")
       .join("/");
@@ -185,5 +199,12 @@ export function setDynamicValues(allValues) {
   return {
     type: SET_DYNAMIC_VALUES,
     payload: allValues,
+  };
+}
+
+export function getCharCodes(charCodes) {
+  return {
+    type: GET_CHARCODES,
+    payload: charCodes,
   };
 }

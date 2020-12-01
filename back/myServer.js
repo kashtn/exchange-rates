@@ -23,3 +23,8 @@ app.post("/saveRates", (req, res) => {
     res.json(false);
   }
 });
+
+app.post('/setBase', (req, res) => {
+  let base = req.body
+  console.log(base);
+})

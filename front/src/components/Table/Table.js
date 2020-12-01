@@ -1,7 +1,7 @@
 import "./Table.css";
 import "antd/dist/antd.css";
 import { useState, useEffect } from "react";
-import { Table, Button, Form, Input, Modal, Popover } from "antd";
+import { Table, Button, Form, Input, Modal, Popover, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
   startGetting,
@@ -13,10 +13,11 @@ import {
   alphabetFilter,
   setCompareRates,
   getDynamic,
+  getBase
 } from "../../redux/actions";
 import Graph from "../Graph/Graph";
 
-const { Search } = Input;
+const { Option } = Select;
 
 function TableCard() {
   const dispatch = useDispatch();
@@ -34,6 +35,33 @@ function TableCard() {
   const [compareFlag, setCompareFlag] = useState(false);
   const [dynamicFlag, setDynamicFlag] = useState(false);
   const [currentCharCode, setCurrentCharCode] = useState("");
+  const [selectedChar, setSelectedChar] = useState("");
+
+  let newArr = [];
+  let current =
+    selectedChar && reduxRates
+      ? reduxRates.find((rate) => {
+          if (rate["@attributes"].ID === selectedChar) {
+            return rate;
+          } else return "";
+        })
+      : reduxRates;
+  newArr.push(current);
+
+  const layout = {
+    labelCol: {
+      span: 5,
+    },
+    wrapperCol: {
+      span: 16,
+    },
+  };
+  const tailLayout = {
+    wrapperCol: {
+      offset: 4,
+      span: 16,
+    },
+  };
 
   useEffect(() => {
     if (filter === "toLowest") {
@@ -42,6 +70,12 @@ function TableCard() {
       dispatch(filterToHighest());
     }
   }, [dispatch, filter]);
+
+  useEffect(() => {
+    dispatch(startGetting(""));
+    dispatch(getBase())
+    setVisible(true);
+  }, [dispatch]);
 
   const content = (
     <>
@@ -134,15 +168,27 @@ function TableCard() {
     }
   }
 
-  function onSearch(value) {
-    setDynamicFlag(false);
-    dispatch(cleanFilter());
-    if (value.match(checker)) {
-      setVisible(true);
-      setCompareFlag(false);
-      dispatch(startGetting("?date_req=" + value));
-      dispatch(setCurrentDate(value));
-      dispatch(setCompareRates([]));
+  const onReset = () => {
+    form.resetFields();
+    setSelectedChar("");
+  };
+
+  function onSearch(values) {
+    if (values.date) {
+      setDynamicFlag(false);
+      setSelectedChar(values.charCode);
+      dispatch(cleanFilter());
+      if (values.date.match(checker)) {
+        setVisible(true);
+        setCompareFlag(false);
+        dispatch(startGetting("?date_req=" + values.date));
+        dispatch(setCurrentDate(values.date));
+        dispatch(setCompareRates([]));
+      } else {
+        Modal.error({
+          title: "Некорректный ввод!",
+        });
+      }
     } else {
       Modal.error({
         title: "Некорректный ввод!",
@@ -152,6 +198,7 @@ function TableCard() {
 
   async function compare(values) {
     setDynamicFlag(false);
+    setSelectedChar("");
     dispatch(cleanFilter());
     if (
       values.date1 &&
@@ -227,35 +274,75 @@ function TableCard() {
           </Button>
         </div>
         <div name="dateForm" className="dateForm">
-          <h3>Найти</h3>
-          <Search
-            className="searchInput"
-            placeholder="dd/mm/yyyy"
-            onSearch={onSearch}
-            enterButton
-            maxLength="10"
-          />
-          <h3>Сравнить</h3>
-          <Form form={form} onFinish={compare}>
-            <Form.Item name="date1" label="Дата 1">
-              <Input
-                className="searchInput"
-                placeholder="dd/mm/yyyy"
-                maxLength="10"
-              />
-            </Form.Item>
-            <Form.Item name="date2" label="Дата 2">
-              <Input
-                className="searchInput"
-                placeholder="dd/mm/yyyy"
-                maxLength="10"
-              />
-            </Form.Item>
-            <Button htmlType="submit">Сравнить</Button>
-          </Form>
+          <div className="form">
+            <h3>Найти</h3>
+            <Form
+              {...layout}
+              form={form}
+              name="searchForm"
+              onFinish={onSearch}
+              initialValues={{
+                default: "Все",
+              }}
+            >
+              <Form.Item name="date" label="Дата">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Валюта" name="default">
+                <Select style={{ width: 120 }} title="Валюта">
+                  <Option value="">Все</Option>
+                  {reduxRates &&
+                    reduxRates.map((rate) => (
+                      <Option
+                        key={rate.CharCode}
+                        value={rate["@attributes"].ID}
+                      >
+                        {rate.CharCode}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item {...tailLayout}>
+                <Button className="button" type="primary" htmlType="submit">
+                  Найти
+                </Button>
+                <Button className="button" htmlType="button" onClick={onReset}>
+                  Сбросить
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
+          <div className="form">
+            <h3>Сравнить</h3>
+            <Form {...layout} onFinish={compare}>
+              <Form.Item name="date1" label="Дата 1">
+                <Input
+                  className="searchInput"
+                  placeholder="dd/mm/yyyy"
+                  maxLength="10"
+                />
+              </Form.Item>
+              <Form.Item name="date2" label="Дата 2">
+                <Input
+                  className="searchInput"
+                  placeholder="dd/mm/yyyy"
+                  maxLength="10"
+                />
+              </Form.Item>
+              <Form.Item {...tailLayout}>
+                <Button htmlType="submit">Сравнить</Button>
+              </Form.Item>
+            </Form>
+          </div>
         </div>
         {loading && <div className="loader"></div>}
-        {!loading && visible && (
+        {!loading && selectedChar && (
+          <div className="table">
+            <h4>{currentDate}</h4>
+            <Table columns={columns} dataSource={newArr && newArr} />
+          </div>
+        )}
+        {!loading && visible && !selectedChar && (
           <>
             <Popover content={content}>
               <Button type="link">Фильтровать</Button>

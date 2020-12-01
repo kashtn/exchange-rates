@@ -8,6 +8,15 @@
   margin: 20px auto;
   padding-bottom: 10px;
 }
+.form{
+  border: 1px dashed rgba(79, 111, 255, 0.267);
+  min-width: 600px;
+  max-width: 1000px;
+  position: relative;
+  left: -50%;
+  margin-bottom: 10px;
+  border-radius: 3px;
+}
 .table {
   display: flex;
   flex-direction: column;
@@ -32,4 +41,7 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+.button{
+  margin-right: 5px;
 }
