@@ -76,9 +76,7 @@ function TableCard() {
 
   useEffect(() => {
     dispatch(startGetting(""));
-    // dispatch(getBase());
     setVisible(true);
-    // getBase()
   }, [dispatch]);
 
   const content = (
@@ -292,7 +290,7 @@ function TableCard() {
               }}
             >
               <Form.Item name="date" label="Дата">
-                <Input />
+                <Input placeholder="dd/mm/yyyy" />
               </Form.Item>
               <Form.Item label="Валюта" name="charCode">
                 <Select style={{ width: 120 }} title="Валюта">
