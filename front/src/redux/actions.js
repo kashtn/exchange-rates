@@ -54,16 +54,6 @@ function xmlToJson(xml) {
   return obj;
 }
 
-export function getBase(){
-  let date = new Date().toJSON().slice(0,10).split('-')
-  date = [date[2], date[1], date[0]]
-  const today = date.join('/')
-  console.log(today);
-  return async () => {
-
-  }
-}
-
 export function startGetting(date1, date2) {
   return async function (dispatch) {
     dispatch(startLoading());

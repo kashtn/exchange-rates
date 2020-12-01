@@ -13,9 +13,9 @@ import {
   alphabetFilter,
   setCompareRates,
   getDynamic,
-  getBase
 } from "../../redux/actions";
 import Graph from "../Graph/Graph";
+import GetBase from "../GetBase/GetBase";
 
 const { Option } = Select;
 
@@ -39,13 +39,16 @@ function TableCard() {
 
   let newArr = [];
   let current =
-    selectedChar && reduxRates
-      ? reduxRates.find((rate) => {
-          if (rate["@attributes"].ID === selectedChar) {
-            return rate;
-          } else return "";
-        })
-      : reduxRates;
+    selectedChar &&
+    selectedChar !== "Все" &&
+    reduxRates ?
+    reduxRates.find((rate) => {
+      if (rate["@attributes"].ID === selectedChar) {
+        console.log('condition');
+        return rate;
+      } else return "";
+    })
+  : reduxRates;
   newArr.push(current);
 
   const layout = {
@@ -73,8 +76,9 @@ function TableCard() {
 
   useEffect(() => {
     dispatch(startGetting(""));
-    dispatch(getBase())
+    // dispatch(getBase());
     setVisible(true);
+    // getBase()
   }, [dispatch]);
 
   const content = (
@@ -170,6 +174,7 @@ function TableCard() {
 
   const onReset = () => {
     form.resetFields();
+    setVisible(false)
     setSelectedChar("");
   };
 
@@ -257,6 +262,7 @@ function TableCard() {
   return (
     <>
       <div className="main">
+        <GetBase/>
         <div>
           <h1>Курс Валют</h1>
           <Button
@@ -282,13 +288,13 @@ function TableCard() {
               name="searchForm"
               onFinish={onSearch}
               initialValues={{
-                default: "Все",
+                charCode: "Все",
               }}
             >
               <Form.Item name="date" label="Дата">
                 <Input />
               </Form.Item>
-              <Form.Item label="Валюта" name="default">
+              <Form.Item label="Валюта" name="charCode">
                 <Select style={{ width: 120 }} title="Валюта">
                   <Option value="">Все</Option>
                   {reduxRates &&
@@ -339,7 +345,12 @@ function TableCard() {
         {!loading && selectedChar && (
           <div className="table">
             <h4>{currentDate}</h4>
-            <Table columns={columns} dataSource={newArr && newArr} />
+            <Table
+              columns={columns}
+              dataSource={selectedChar !== "Все" 
+              ? newArr 
+              : reduxRates}
+            />
           </div>
         )}
         {!loading && visible && !selectedChar && (
