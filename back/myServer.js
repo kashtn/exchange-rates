@@ -9,7 +9,13 @@ let app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-mongoose.connect("mongodb://localhost:27017/cbr_base", {
+// mongoose.connect("mongodb://localhost:27017/cbr_base", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   useCreateIndex: true,
+// });
+
+mongoose.connect('mongodb+srv://ivan_musk:whitesector1488@exchange-rates.byyid.mongodb.net/cbr_base' || "mongodb://localhost:27017/cbr_base", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
