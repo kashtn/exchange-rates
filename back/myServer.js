@@ -2,7 +2,6 @@ import fs from "fs";
 import express from "express";
 import mongoose from "mongoose";
 import Day from "./models/Day.js";
-import { resolve } from "path";
 
 let app = express();
 
@@ -15,7 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 //   useCreateIndex: true,
 // });
 
-mongoose.connect('mongodb+srv://ivan_musk:whitesector1488@exchange-rates.byyid.mongodb.net/cbr_base' || "mongodb://localhost:27017/cbr_base", {
+mongoose.connect('mongodb+srv://ivan_musk:whitesector1488@exchange-rates.byyid.mongodb.net/cbr_base', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,

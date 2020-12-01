@@ -3,7 +3,7 @@ import { Button } from "antd";
 
 function GetBase() {
   useEffect(() => {
-    // getBaseRates();
+    getBaseRates();
   }, []);
 
   function xmlToJson(xml) {
