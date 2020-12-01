@@ -48,7 +48,7 @@ function GetBase() {
 
   async function getDay(day, mounth, year) {
     const url = `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${day}/${mounth}/${year}`;
-    const response = await fetch("http://localhost:8080/" + url);
+    const response = await fetch(process.env.URL + url);
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const rates = xmlToJson(XmlNode).ValCurs;

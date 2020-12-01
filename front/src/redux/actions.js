@@ -58,7 +58,8 @@ export function startGetting(date1, date2) {
   return async function (dispatch) {
     dispatch(startLoading());
     const url = `http://www.cbr.ru/scripts/XML_daily.asp${date1}`;
-    const response = await fetch("http://localhost:8080/" + url);
+    // const response = await fetch("http://localhost:8080/" + url);
+    const response = await fetch(process.env.URL + url);
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const rates = xmlToJson(XmlNode).ValCurs.Valute;
@@ -77,7 +78,7 @@ export function startGetting(date1, date2) {
 
     if (date2 && date2.length > 0) {
       const url = `http://www.cbr.ru/scripts/XML_daily.asp${date2}`;
-      const response = await fetch("http://localhost:8080/" + url);
+      const response = await fetch(process.env.URL + url);
       const result = await response.text();
       const XmlNode = new DOMParser().parseFromString(result, "text/xml");
       const rates = xmlToJson(XmlNode).ValCurs.Valute;
@@ -93,7 +94,7 @@ export function startGetting(date1, date2) {
 export function getDynamic(currencyId, date1, date2) {
   return async function (dispatch) {
     const url = `http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=${date1}&date_req2=${date2}&VAL_NM_RQ=${currencyId}`;
-    const response = await fetch("http://localhost:8080/" + url);
+    const response = await fetch(process.env.URL + url);
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const records = xmlToJson(XmlNode).ValCurs.Record;
