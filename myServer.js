@@ -27,9 +27,11 @@ mongoose.connect(
     useCreateIndex: true,
   }
 );
+app.use(express.static('../front/build'))
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static('../front/build'))
+  console.log('123');
   // app.use(express.static(path.join(__dirname, "front/build")));
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'front/build', 'index.html'));
