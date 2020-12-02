@@ -3,6 +3,15 @@ import express from "express";
 import mongoose from "mongoose";
 import Day from "./models/Day.js";
 
+// import cors_proxy from "cors-anywhere";
+
+// cors_proxy
+//   .createServer({
+//     originWhitelist: [],
+//     requireHeader: ["origin", "x-requested-with"],
+//     removeHeaders: ["cookie", "cookie2"],
+//   })
+
 let app = express();
 const PORT = process.env.PORT || 666;
 
@@ -23,7 +32,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.listen(PORT, () => {
-  console.log("Listening to Hell...");
+  console.log(`CORS anywhere and Server are running at ${PORT}...`);
 });
 
 app.post("/saveRates", (req, res) => {
