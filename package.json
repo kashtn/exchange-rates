@@ -17,7 +17,6 @@
   "scripts": {
     "front": "cd front && yarn start",
     "back": "cd back && yarn start",
-    "start": "concurrently \"yarn front\" \"yarn back\"",
-    "build": "cd front && yarn build"
+    "start": "concurrently \"yarn front\" \"yarn back\""
   }
 }
