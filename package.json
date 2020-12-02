@@ -17,7 +17,7 @@
   "scripts": {
     "front": "cd front && yarn start",
     "back": "cd back && yarn start",
-    "start": "concurrently \"yarn front\" \"yarn back\"",
+    "start": "concurrently --kill-others-on-fail \"yarn front\" \"yarn back\"",
     "build": "cd front && npm run build",
     "install-client": "cd front && npm install",
     "heroku-postbuild":"npm run install-client && npm run build"
