@@ -16,7 +16,7 @@
   "type": "module",
   "scripts": {
     "cors": "nodemon corsServer.js",
-    "my": "node myServer.js",
-    "start": "concurrently \"yarn my\""
+    "my": "nodemon myServer.js",
+    "start": "concurrently \"yarn cors\" \"yarn my\""
   }
 }

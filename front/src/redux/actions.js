@@ -97,7 +97,7 @@ export function startGetting(date1, date2) {
 export function getDynamic(currencyId, date1, date2) {
   return async function (dispatch) {
     const url = `http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=${date1}&date_req2=${date2}&VAL_NM_RQ=${currencyId}`;
-    const response = await fetch(process.env.URL + url);
+    const response = await fetch("http://localhost:8080/" + url);
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const records = xmlToJson(XmlNode).ValCurs.Record;
