@@ -28,7 +28,7 @@ mongoose.connect(
 );
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static('../front/build'))
+  app.use(express.static('front/build'))
 }
 
 app.listen(PORT, () => {
