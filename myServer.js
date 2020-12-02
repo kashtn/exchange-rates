@@ -12,7 +12,7 @@ import path from "path";
 //     requireHeader: ["origin", "x-requested-with"],
 //     removeHeaders: ["cookie", "cookie2"],
 //   })
-
+const __dirname = path.resolve();
 let app = express();
 const PORT = process.env.PORT || 666;
 
@@ -40,7 +40,9 @@ app.listen(PORT, () => {
   console.log(`CORS anywhere and Server are running at ${PORT}...`);
 });
 
-
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'front/build', 'index.html'));
+});
 
 app.post("/saveRates", (req, res) => {
   let fileToSave = req.body;
