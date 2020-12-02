@@ -2,7 +2,7 @@ import fs from "fs";
 import express from "express";
 import mongoose from "mongoose";
 import Day from "./models/Day.js";
-import path from 'path'
+import path from "path";
 
 // import cors_proxy from "cors-anywhere";
 
@@ -30,7 +30,7 @@ mongoose.connect(
 
 if (process.env.NODE_ENV === "production") {
   // app.use(express.static('../front/build'))
-  app.use(express.static(path.join(__dirname, 'front/build')));
+  app.use(express.static(path.join(__dirname, "../front/build")));
 }
 
 app.listen(PORT, () => {
