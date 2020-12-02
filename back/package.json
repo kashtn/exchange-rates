@@ -17,6 +17,6 @@
   "scripts": {
     "cors": "nodemon corsServer.js",
     "my": "nodemon myServer.js",
-    "start": "concurrently \"yarn cors\" \"yarn my\""
+    "start": "concurrently \"yarn my\""
   }
 }
