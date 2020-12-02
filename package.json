@@ -18,6 +18,6 @@
     "front": "cd front && yarn start",
     "back": "cd back && yarn start",
     "start": "concurrently \"yarn front\" \"yarn back\"",
-    "build": "cd client && yarn build"
+    "build": "cd front && yarn build"
   }
 }
