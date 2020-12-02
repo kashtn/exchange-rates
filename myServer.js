@@ -31,15 +31,16 @@ mongoose.connect(
 if (process.env.NODE_ENV === "production") {
   // app.use(express.static('../front/build'))
   app.use(express.static(path.join(__dirname, "front/build")));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'front/build', 'index.html'));
+  });
 }
 
 app.listen(PORT, () => {
   console.log(`CORS anywhere and Server are running at ${PORT}...`);
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello')
-})
+
 
 app.post("/saveRates", (req, res) => {
   let fileToSave = req.body;
