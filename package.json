@@ -15,8 +15,8 @@
     "victory": "^35.4.0"
   },
   "scripts": {
-    "front": "cd front && yarn start",
-    "back": "cd back && yarn start",
+    "front": "cd front && npm run start",
+    "back": "cd back && npm run start",
     "start": "concurrently --kill-others-on-fail \"yarn front\" \"yarn back\"",
     "build": "cd front && npm run build",
     "install-client": "cd front && npm install",
