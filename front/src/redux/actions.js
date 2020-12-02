@@ -62,7 +62,7 @@ export function startGetting(date1, date2) {
     const url = `http://www.cbr.ru/scripts/XML_daily.asp${date1}`;
     // const response = await fetch("http://localhost:8080/" + url);
     console.log(process.env.URL);
-    const response = await fetch('http://localhost:8080/' + url);
+    const response = await fetch('https://cors-anywhere.herokuapp.com/' + url);
     const result = await response.text();
     const XmlNode = new DOMParser().parseFromString(result, "text/xml");
     const rates = xmlToJson(XmlNode).ValCurs.Valute;
