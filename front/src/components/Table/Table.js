@@ -36,20 +36,40 @@ function TableCard() {
   const [dynamicFlag, setDynamicFlag] = useState(false);
   const [currentCharCode, setCurrentCharCode] = useState("");
   const [selectedChar, setSelectedChar] = useState("");
+  const [selectedCompareChar, setSelectedCompareChar] = useState("");
 
   let newArr = [];
   let current =
-    selectedChar &&
-    selectedChar !== "Все" &&
-    reduxRates ?
-    reduxRates.find((rate) => {
-      if (rate["@attributes"].ID === selectedChar) {
-        console.log('condition');
-        return rate;
-      } else return "";
-    })
-  : reduxRates;
+    selectedChar && selectedChar !== "Все" && reduxRates
+      ? reduxRates.find((rate) => {
+          if (rate["@attributes"].ID === selectedChar) {
+            return rate;
+          } else return "";
+        })
+      : reduxRates;
   newArr.push(current);
+
+  let newArr2 = [];
+  let newCurrent =
+    selectedCompareChar && selectedCompareChar !== "Все" && reduxRates
+      ? reduxRates.find((rate) => {
+          if (rate["@attributes"].ID === selectedCompareChar) {
+            return rate;
+          } else return "";
+        })
+      : reduxRates;
+  newArr2 = [newCurrent];
+
+  let newCompareArr = [];
+  let currentCompare =
+    selectedCompareChar && selectedCompareChar !== "Все" && reduxCompareRates
+      ? reduxCompareRates.find((rate) => {
+          if (rate["@attributes"].ID === selectedCompareChar) {
+            return rate;
+          } else return "";
+        })
+      : reduxCompareRates;
+  newCompareArr = [currentCompare];
 
   const layout = {
     labelCol: {
@@ -156,7 +176,7 @@ function TableCard() {
           (currency) => currency.CharCode === currencyName
         );
         const id = Object.values(currencyId["@attributes"])[0];
-        dispatch(getDynamic(id, currentDate, currentCompareDate));
+        dispatch(getDynamic(id, currentDate, currentCompareDate, currencyName));
         setDynamicFlag(true);
       } catch (err) {
         Modal.error({
@@ -172,7 +192,7 @@ function TableCard() {
 
   const onReset = () => {
     form.resetFields();
-    setVisible(false)
+    setVisible(false);
     setSelectedChar("");
   };
 
@@ -184,7 +204,7 @@ function TableCard() {
       if (values.date.match(checker)) {
         setVisible(true);
         setCompareFlag(false);
-        dispatch(startGetting("?date_req=" + values.date));
+        dispatch(startGetting(values.date));
         dispatch(setCurrentDate(values.date));
         dispatch(setCompareRates([]));
       } else {
@@ -203,6 +223,7 @@ function TableCard() {
     setDynamicFlag(false);
     setSelectedChar("");
     dispatch(cleanFilter());
+    setSelectedCompareChar(values.compareCharCode);
     if (
       values.date1 &&
       values.date2 &&
@@ -210,9 +231,7 @@ function TableCard() {
       values.date2.match(checker)
     ) {
       setVisible(false);
-      dispatch(
-        startGetting("?date_req=" + values.date1, "?date_req=" + values.date2)
-      );
+      dispatch(startGetting(values.date1, values.date2));
       setCompareFlag(true);
     } else {
       Modal.error({
@@ -221,46 +240,67 @@ function TableCard() {
     }
   }
 
+  function download(filename, text) {
+    var element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+    );
+    element.setAttribute("download", filename);
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
   async function saveRates() {
-    if (reduxCompareRates) {
-      const data = {
-        date1: reduxRates,
-        date2: reduxCompareRates,
+    if (selectedChar !== "Все" && reduxCompareRates.length === 0) {
+      let data = {
+        Date: currentDate,
+        data: newArr,
       };
-      const response = await fetch("/saveRates", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      download("rates.json", JSON.stringify(data));
+    } else if (selectedChar === "Все") {
+      let data = {
+        Date: currentDate,
+        data: reduxRates,
+      };
+      download("rates.json", JSON.stringify(data));
+    }
+    if (reduxCompareRates.length > 0 && !selectedCompareChar) {
+      let data = {
+        data_1: {
+          Date: currentDate,
+          data: reduxRates,
         },
-        body: JSON.stringify(data),
-      });
-      const result = await response.json();
-      if (result) {
-        Modal.success({
-          title: "Отчет сохранен!",
-        });
-      }
-    } else {
-      const response = await fetch("/saveRates", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+        data_2: {
+          Date: currentCompareDate,
+          data: reduxCompareRates,
         },
-        body: JSON.stringify(reduxRates),
-      });
-      const result = await response.json();
-      if (result) {
-        Modal.success({
-          title: "Отчет сохранен!",
-        });
-      }
+      };
+      download("rates.json", JSON.stringify(data));
+    } else if (selectedCompareChar) {
+      let data = {
+        data_1: {
+          Date: currentDate,
+          data: newArr2,
+        },
+        data_2: {
+          Date: currentCompareDate,
+          data: newCompareArr,
+        },
+      };
+      download("rates.json", JSON.stringify(data));
     }
   }
 
   return (
     <>
       <div className="main">
-        {/* <GetBase/> */}
+        <GetBase />
         <div>
           <h1>Курс Валют</h1>
           <Button
@@ -287,6 +327,7 @@ function TableCard() {
               onFinish={onSearch}
               initialValues={{
                 charCode: "Все",
+                compareCharCode: "Все",
               }}
             >
               <Form.Item name="date" label="Дата">
@@ -333,6 +374,20 @@ function TableCard() {
                   maxLength="10"
                 />
               </Form.Item>
+              <Form.Item label="Валюта" name="compareCharCode">
+                <Select style={{ width: 120 }} title="Валюта">
+                  <Option value="">Все</Option>
+                  {reduxRates &&
+                    reduxRates.map((rate) => (
+                      <Option
+                        key={rate.CharCode}
+                        value={rate["@attributes"].ID}
+                      >
+                        {rate.CharCode}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
               <Form.Item {...tailLayout}>
                 <Button htmlType="submit">Сравнить</Button>
               </Form.Item>
@@ -345,15 +400,13 @@ function TableCard() {
             <h4>{currentDate}</h4>
             <Table
               columns={columns}
-              dataSource={selectedChar !== "Все" 
-              ? newArr 
-              : reduxRates}
+              dataSource={selectedChar !== "Все" ? newArr : reduxRates}
             />
           </div>
         )}
         {!loading && visible && !selectedChar && (
           <>
-            <Popover content={content}>
+            <Popover content={content} trigger="click">
               <Button type="link">Фильтровать</Button>
             </Popover>
             <div className="table">
@@ -365,7 +418,7 @@ function TableCard() {
         {dynamicFlag && <Graph charCode={currentCharCode} />}
         {!loading && compareFlag && (
           <>
-            <Popover content={content}>
+            <Popover content={content} trigger="click">
               <Button type="link">Фильтровать</Button>
             </Popover>
             <div className="compareTable">
@@ -374,14 +427,16 @@ function TableCard() {
                 <h4>{currentDate}</h4>
                 <Table
                   columns={columns}
-                  dataSource={reduxRates && reduxRates}
+                  dataSource={selectedCompareChar ? newArr2 : reduxRates}
                 />
               </div>
               <div className="table">
                 <h4>{currentCompareDate}</h4>
                 <Table
                   columns={columns}
-                  dataSource={reduxCompareRates && reduxCompareRates}
+                  dataSource={
+                    selectedCompareChar ? newCompareArr : reduxCompareRates
+                  }
                 />
               </div>
             </div>

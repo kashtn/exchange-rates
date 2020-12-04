@@ -10,7 +10,6 @@
     "cors-anywhere": "^0.4.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "fs": "^0.0.1-security",
     "mongoose": "^5.11.0",
     "nodemon": "^2.0.6",
     "react-redux": "^7.2.2",
@@ -20,9 +19,10 @@
     "victory": "^35.4.0"
   },
   "scripts": {
+    "dev": "concurrently \"yarn front\"  \"yarn start\" \"node corsServer.js\" ",
     "front": "cd front && npm run start",
-    "back": "cd back && npm run start",
-    "start": "node myServer.js",
+    "back": "cd back && yarn start",
+    "start": "nodemon myServer.js",
     "build": "cd front && npm run build",
     "install-client": "cd front && npm install",
     "heroku-postbuild": "npm run install-client && npm run build"

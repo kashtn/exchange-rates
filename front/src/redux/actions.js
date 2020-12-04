@@ -13,8 +13,6 @@ import {
   SET_DYNAMIC_VALUES,
   GET_CHARCODES,
 } from "./actionTypes";
-import dotenv from 'dotenv'
-dotenv.config()
 
 function xmlToJson(xml) {
   var obj = {};
@@ -59,60 +57,136 @@ function xmlToJson(xml) {
 export function startGetting(date1, date2) {
   return async function (dispatch) {
     dispatch(startLoading());
-    const url = `http://www.cbr.ru/scripts/XML_daily.asp${date1}`;
-    // const response = await fetch("http://localhost:8080/" + url);
-    console.log(process.env.URL);
-    const response = await fetch('https://cors-anywhere.herokuapp.com/' + url);
-    const result = await response.text();
-    const XmlNode = new DOMParser().parseFromString(result, "text/xml");
-    const rates = xmlToJson(XmlNode).ValCurs.Valute;
-    dispatch(setRates(rates));
-    const charCodes = rates.map((el) => {
-      return el.CharCode;
-    });
-    dispatch(getCharCodes(charCodes));
-    const currentDate = xmlToJson(XmlNode)
-      .ValCurs["@attributes"].Date.split(".")
-      .join("/");
-    setTimeout(async () => {
-      dispatch(setCurrentDate(currentDate));
-      dispatch(finishLoading());
-    }, 500);
-
-    if (date2 && date2.length > 0) {
-      const url = `http://www.cbr.ru/scripts/XML_daily.asp${date2}`;
-      const response = await fetch('https://cors-anywhere.herokuapp.com/' + url);
+    const url = `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date1}`;
+    const response = await fetch("http://localhost:8080/" + url);
+    // const response = await fetch("https://cors-anywhere.herokuapp.com/" + url);
+    dispatch(finishLoading());
+    if (response.status !== 200) {
+      const response = await fetch("/getCurrentDay", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: date1 && JSON.stringify({ date1 }),
+      });
+      const result = await response.json();
+      if (result) {
+        const rates = result.Valute;
+        dispatch(setRates(rates));
+        const charCodes = rates.map((el) => {
+          return el.CharCode;
+        });
+        dispatch(getCharCodes(charCodes));
+        const currentDate = result["@attributes"].Date.split(".").join("/");
+        setTimeout(async () => {
+          dispatch(setCurrentDate(currentDate));
+          dispatch(finishLoading());
+        }, 500);
+      } else {
+        console.log("Нет котировок на заданный день!");
+        dispatch(finishLoading());
+      }
+    } else {
       const result = await response.text();
       const XmlNode = new DOMParser().parseFromString(result, "text/xml");
       const rates = xmlToJson(XmlNode).ValCurs.Valute;
-      dispatch(setCompareRates(rates));
+      dispatch(setRates(rates));
+      const charCodes = rates.map((el) => {
+        return {
+          charCode: el.CharCode,
+          id: el["@attributes"].ID,
+        };
+      });
+      dispatch(getCharCodes(charCodes));
       const currentDate = xmlToJson(XmlNode)
         .ValCurs["@attributes"].Date.split(".")
         .join("/");
-      dispatch(setCurrentCompareDate(currentDate));
+      setTimeout(async () => {
+        dispatch(setCurrentDate(currentDate));
+        dispatch(finishLoading());
+      }, 500);
+    }
+    if (date2 && date2.length > 0) {
+      const url = `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date2}`;
+      const response = await fetch("http://localhost:8080/" + url);
+      // const response = await fetch(
+      //   "https://cors-anywhere.herokuapp.com/" + url
+      // );
+      if (response.status !== 200) {
+        const response = await fetch("/getCurrentDay", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: date2 && JSON.stringify({ date2 }),
+        });
+        const result = await response.json();
+        if (result) {
+          const rates = result.Valute;
+          dispatch(setCompareRates(rates));
+          const charCodes = rates.map((el) => {
+            return el.CharCode;
+          });
+          dispatch(getCharCodes(charCodes));
+          const currentDate = result["@attributes"].Date.split(".").join("/");
+          dispatch(setCurrentCompareDate(currentDate));
+          dispatch(finishLoading());
+        } else {
+          console.log("Нет котировок на заданный день!");
+          dispatch(finishLoading());
+        }
+      } else {
+        const result = await response.text();
+        const XmlNode = new DOMParser().parseFromString(result, "text/xml");
+        const rates = xmlToJson(XmlNode).ValCurs.Valute;
+        dispatch(setCompareRates(rates));
+        const currentDate = xmlToJson(XmlNode)
+          .ValCurs["@attributes"].Date.split(".")
+          .join("/");
+        dispatch(setCurrentCompareDate(currentDate));
+      }
     }
   };
 }
 
-export function getDynamic(currencyId, date1, date2) {
+export function getDynamic(currencyId, date1, date2, charCode) {
   return async function (dispatch) {
     const url = `http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=${date1}&date_req2=${date2}&VAL_NM_RQ=${currencyId}`;
+    // const response = await fetch("https://cors-anywhere.herokuapp.com/" + url);
     const response = await fetch("http://localhost:8080/" + url);
-    const result = await response.text();
-    const XmlNode = new DOMParser().parseFromString(result, "text/xml");
-    const records = xmlToJson(XmlNode).ValCurs.Record;
-    let allValues =
-      records &&
-      records.map((rate) => {
-        let dateOfRate = Object.values(rate["@attributes"])[0];
-        let correctDate = dateOfRate.split(".");
-        [correctDate[0], correctDate[1]] = [correctDate[1], correctDate[0]];
+    if (response.status !== 200) {
+      const response = await fetch("/getCurrentDynamic", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date1, date2, charCode }),
+      });
+      const result = await response.json();
+      let final = result.map((record) => {
         return {
-          x: new Date(correctDate.join(".")),
-          y: Number(rate.Value.split(",").join(".")),
+          x: new Date(record.x),
+          y: record.y,
         };
       });
-    dispatch(setDynamicValues(allValues));
+      dispatch(setDynamicValues(final));
+    } else {
+      const result = await response.text();
+      const XmlNode = new DOMParser().parseFromString(result, "text/xml");
+      const records = xmlToJson(XmlNode).ValCurs.Record;
+      let allValues =
+        records &&
+        records.map((rate) => {
+          let dateOfRate = Object.values(rate["@attributes"])[0];
+          let correctDate = dateOfRate.split(".");
+          [correctDate[0], correctDate[1]] = [correctDate[1], correctDate[0]];
+          return {
+            x: new Date(correctDate.join(".")),
+            y: Number(rate.Value.split(",").join(".")),
+          };
+        });
+      dispatch(setDynamicValues(allValues));
+    }
   };
 }
 

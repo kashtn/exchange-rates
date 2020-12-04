@@ -3,9 +3,15 @@ const { Schema, model } = mongoose;
 
 const DaySchema = new Schema({
   date: String,
-  valutes: [
+  "@attributes": {
+    Date: String,
+    name: String,
+  },
+  Valute: [
     {
-      ID: String ,
+      "@attributes": {
+        ID: String,
+      },
       NumCode: String,
       CharCode: String,
       Nominal: String,
