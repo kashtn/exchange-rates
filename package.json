@@ -19,10 +19,10 @@
     "victory": "^35.4.0"
   },
   "scripts": {
-    "dev": "concurrently \"yarn front\"  \"yarn start\" \"node corsServer.js\" ",
-    "front": "cd front && npm run start",
+    "dev": "concurrently \"yarn front\"  \"nodemon myServer.js\" \"nodemon corsServer.js\" ",
+    "front": "cd front && yarn start",
     "back": "cd back && yarn start",
-    "start": "nodemon myServer.js",
+    "start": "concurrently \"yarn front\"  \"node myServer.js\" \"node corsServer.js\" ",
     "build": "cd front && npm run build",
     "install-client": "cd front && npm install",
     "heroku-postbuild": "npm run install-client && npm run build"
