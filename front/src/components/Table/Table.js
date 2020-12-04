@@ -1,7 +1,7 @@
 import "./Table.css";
 import "antd/dist/antd.css";
 import { useState, useEffect } from "react";
-import { Table, Button, Form, Input, Modal, Popover, Select } from "antd";
+import { Table, Button, Form, Modal, Popover, Select, Calendar } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
   startGetting,
@@ -21,7 +21,6 @@ const { Option } = Select;
 
 function TableCard() {
   const dispatch = useDispatch();
-  const checker = /^(0[1-9]|[12][0-9]|3[01])[/](0[1-9]|1[012])[/](19|20)\d\d$/;
   const [form] = Form.useForm();
 
   const reduxRates = useSelector((state) => state.rates);
@@ -30,11 +29,16 @@ function TableCard() {
   const currentCompareDate = useSelector((state) => state.currentCompareDate);
   const loading = useSelector((state) => state.loading);
   const filter = useSelector((state) => state.filter);
+  console.log("Rates", reduxRates);
+  console.log("CompareRates", reduxCompareRates);
 
   const [visible, setVisible] = useState(false);
   const [compareFlag, setCompareFlag] = useState(false);
   const [dynamicFlag, setDynamicFlag] = useState(false);
   const [currentCharCode, setCurrentCharCode] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedCompareDate1, setSelectedCompareDate1] = useState("");
+  const [selectedCompareDate2, setSelectedCompareDate2] = useState("");
   const [selectedChar, setSelectedChar] = useState("");
   const [selectedCompareChar, setSelectedCompareChar] = useState("");
 
@@ -88,9 +92,9 @@ function TableCard() {
 
   useEffect(() => {
     if (filter === "toLowest") {
-      dispatch(filterToLowest());
+      dispatch(filterToLowest(reduxRates, reduxCompareRates));
     } else if (filter === "toHighest") {
-      dispatch(filterToHighest());
+      dispatch(filterToHighest(reduxRates, reduxCompareRates));
     }
   }, [dispatch, filter]);
 
@@ -129,7 +133,7 @@ function TableCard() {
           className="filterBtn"
           onClick={() => {
             dispatch(cleanFilter());
-            dispatch(alphabetFilter());
+            dispatch(alphabetFilter(reduxRates, reduxCompareRates));
           }}
         >
           Фильтр по алфавиту
@@ -167,6 +171,24 @@ function TableCard() {
     },
   ];
 
+  function dateFormatterToNewDate(date) {
+    let dateArr = date.split("/");
+    let dateChange = [dateArr[1], dateArr[0], dateArr[2]];
+    let dateResult = new Date(dateChange);
+    return dateResult;
+  }
+
+  function dateFormatterFromNewDate(date) {
+    let chosenDate = date;
+    let day = chosenDate.getDate();
+    let month = chosenDate.getMonth() + 1;
+    let year = chosenDate.getFullYear();
+    day = day <= 9 ? "0" + day : day;
+    month = month <= 9 ? "0" + month : month;
+    let dateForSearch = day + "/" + month + "/" + year;
+    return dateForSearch;
+  }
+
   function findDynamic(e) {
     if (!visible) {
       setCurrentCharCode(e.target.innerText);
@@ -190,22 +212,24 @@ function TableCard() {
     }
   }
 
-  const onReset = () => {
+  function onReset() {
     form.resetFields();
     setVisible(false);
     setSelectedChar("");
-  };
+  }
 
   function onSearch(values) {
-    if (values.date) {
-      setDynamicFlag(false);
-      setSelectedChar(values.charCode);
-      dispatch(cleanFilter());
-      if (values.date.match(checker)) {
+    if (selectedDate) {
+      let dateArr = selectedDate.split("/");
+      let dateChange = [dateArr[1], dateArr[0], dateArr[2]];
+      let dateResult = new Date(dateChange.join("."));
+      if (dateResult < new Date()) {
+        setDynamicFlag(false);
+        setSelectedChar(values.charCode);
+        dispatch(cleanFilter());
         setVisible(true);
         setCompareFlag(false);
-        dispatch(startGetting(values.date));
-        dispatch(setCurrentDate(values.date));
+        dispatch(startGetting(selectedDate));
         dispatch(setCompareRates([]));
       } else {
         Modal.error({
@@ -224,15 +248,19 @@ function TableCard() {
     setSelectedChar("");
     dispatch(cleanFilter());
     setSelectedCompareChar(values.compareCharCode);
-    if (
-      values.date1 &&
-      values.date2 &&
-      values.date1.match(checker) &&
-      values.date2.match(checker)
-    ) {
-      setVisible(false);
-      dispatch(startGetting(values.date1, values.date2));
-      setCompareFlag(true);
+    if (selectedCompareDate1 && selectedCompareDate2) {
+      if (
+        dateFormatterToNewDate(selectedCompareDate1) <
+        dateFormatterToNewDate(selectedCompareDate2)
+      ) {
+        setVisible(false);
+        dispatch(startGetting(selectedCompareDate1, selectedCompareDate2));
+        setCompareFlag(true);
+      } else {
+        Modal.error({
+          title: "Неправильно заданы даты!",
+        });
+      }
     } else {
       Modal.error({
         title: "Некорректный ввод!",
@@ -241,7 +269,7 @@ function TableCard() {
   }
 
   function download(filename, text) {
-    var element = document.createElement("a");
+    let element = document.createElement("a");
     element.setAttribute(
       "href",
       "data:text/plain;charset=utf-8," + encodeURIComponent(text)
@@ -297,6 +325,33 @@ function TableCard() {
     }
   }
 
+  const contentCalendar = (
+    <div className="site-calendar-demo-card">
+      <Calendar fullscreen={false} onChange={onSearchChange} />
+    </div>
+  );
+  const contentCompareCalendar1 = (
+    <div className="site-calendar-demo-card">
+      <Calendar fullscreen={false} onChange={onCompareChange1} />
+    </div>
+  );
+  const contentCompareCalendar2 = (
+    <div className="site-calendar-demo-card">
+      <Calendar fullscreen={false} onChange={onCompareChange2} />
+    </div>
+  );
+
+  function onSearchChange(value) {
+    setSelectedDate(dateFormatterFromNewDate(value._d));
+    dispatch(setCurrentDate(dateFormatterFromNewDate(value._d)));
+  }
+  function onCompareChange1(value) {
+    setSelectedCompareDate1(dateFormatterFromNewDate(value._d));
+  }
+  function onCompareChange2(value) {
+    setSelectedCompareDate2(dateFormatterFromNewDate(value._d));
+  }
+
   return (
     <>
       <div className="main">
@@ -330,11 +385,20 @@ function TableCard() {
                 compareCharCode: "Все",
               }}
             >
-              <Form.Item name="date" label="Дата">
-                <Input placeholder="dd/mm/yyyy" />
+              <Popover content={contentCalendar} trigger="click">
+                <Button>Выбрать дату</Button>
+              </Popover>
+              <Form.Item label="Дата">
+                <p className="selectedDate">
+                  {selectedDate ? selectedDate : "(Дата не выбрана)"}
+                </p>
               </Form.Item>
               <Form.Item label="Валюта" name="charCode">
-                <Select style={{ width: 120 }} title="Валюта">
+                <Select
+                  className="select"
+                  style={{ width: 120 }}
+                  title="Валюта"
+                >
                   <Option value="">Все</Option>
                   {reduxRates &&
                     reduxRates.map((rate) => (
@@ -360,22 +424,32 @@ function TableCard() {
           <div className="form">
             <h3>Сравнить</h3>
             <Form {...layout} onFinish={compare}>
-              <Form.Item name="date1" label="Дата 1">
-                <Input
-                  className="searchInput"
-                  placeholder="dd/mm/yyyy"
-                  maxLength="10"
-                />
+              <Popover content={contentCompareCalendar1} trigger="click">
+                <Button>Выбрать дату</Button>
+              </Popover>
+              <Form.Item label="Дата 1">
+                <p className="selectedDate">
+                  {selectedCompareDate1
+                    ? selectedCompareDate1
+                    : "(Дата не выбрана)"}
+                </p>
               </Form.Item>
-              <Form.Item name="date2" label="Дата 2">
-                <Input
-                  className="searchInput"
-                  placeholder="dd/mm/yyyy"
-                  maxLength="10"
-                />
+              <Popover content={contentCompareCalendar2} trigger="click">
+                <Button>Выбрать дату</Button>
+              </Popover>
+              <Form.Item label="Дата 2">
+                <p className="selectedDate">
+                  {selectedCompareDate2
+                    ? selectedCompareDate2
+                    : "(Дата не выбрана)"}
+                </p>
               </Form.Item>
               <Form.Item label="Валюта" name="compareCharCode">
-                <Select style={{ width: 120 }} title="Валюта">
+                <Select
+                  className="select"
+                  style={{ width: 120 }}
+                  title="Валюта"
+                >
                   <Option value="">Все</Option>
                   {reduxRates &&
                     reduxRates.map((rate) => (

@@ -10,7 +10,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 mongoose.connect(
-  process.env.MONGODB_URI || "mongodb://localhost:27017/cbr_base",
+  process.env.MONGODB_URI ||
+    "mongodb+srv://ivan_musk:whitesector1488@exchange-rates.byyid.mongodb.net/cbr_base?retryWrites=true&w=majority",
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

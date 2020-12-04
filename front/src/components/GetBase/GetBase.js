@@ -12,7 +12,7 @@ function GetBase() {
   const valutes = useSelector((state) => state.charCodes);
 
   useEffect(() => {
-    getBaseRates();
+    // getBaseRates();
   }, []);
 
   function xmlToJson(xml) {

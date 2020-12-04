@@ -15,20 +15,20 @@ import {
 } from "./actionTypes";
 
 function xmlToJson(xml) {
-  var obj = {};
+  let obj = {};
 
   if (xml.nodeType === 1) {
     if (xml.attributes.length > 0) {
       obj["@attributes"] = {};
-      for (var j = 0; j < xml.attributes.length; j++) {
-        var attribute = xml.attributes.item(j);
+      for (let j = 0; j < xml.attributes.length; j++) {
+        let attribute = xml.attributes.item(j);
         obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
       }
     }
   } else if (xml.nodeType === 3) {
     obj = xml.nodeValue;
   }
-  var textNodes = [].slice.call(xml.childNodes).filter(function (node) {
+  let textNodes = [].slice.call(xml.childNodes).filter(function (node) {
     return node.nodeType === 3;
   });
   if (xml.hasChildNodes() && xml.childNodes.length === textNodes.length) {
@@ -36,14 +36,14 @@ function xmlToJson(xml) {
       return text + node.nodeValue;
     }, "");
   } else if (xml.hasChildNodes()) {
-    for (var i = 0; i < xml.childNodes.length; i++) {
-      var item = xml.childNodes.item(i);
-      var nodeName = item.nodeName;
+    for (let i = 0; i < xml.childNodes.length; i++) {
+      let item = xml.childNodes.item(i);
+      let nodeName = item.nodeName;
       if (typeof obj[nodeName] == "undefined") {
         obj[nodeName] = xmlToJson(item);
       } else {
         if (typeof obj[nodeName].push == "undefined") {
-          var old = obj[nodeName];
+          let old = obj[nodeName];
           obj[nodeName] = [];
           obj[nodeName].push(old);
         }
@@ -97,6 +97,7 @@ export function startGetting(date1, date2) {
           id: el["@attributes"].ID,
         };
       });
+      console.log(charCodes);
       dispatch(getCharCodes(charCodes));
       const currentDate = xmlToJson(XmlNode)
         .ValCurs["@attributes"].Date.split(".")
@@ -127,7 +128,7 @@ export function startGetting(date1, date2) {
           const charCodes = rates.map((el) => {
             return el.CharCode;
           });
-          dispatch(getCharCodes(charCodes));
+          // dispatch(getCharCodes(charCodes));
           const currentDate = result["@attributes"].Date.split(".").join("/");
           dispatch(setCurrentCompareDate(currentDate));
           dispatch(finishLoading());
@@ -239,15 +240,49 @@ export function setFilter(type) {
   };
 }
 
-export function filterToLowest() {
+export function filterToLowest(rates, compareRates) {
+  let filteredRates = rates.sort((a, b) => {
+    let firstRate = Number(a.Value.split(",").join("."));
+    let secondRate = Number(b.Value.split(",").join("."));
+    return secondRate - firstRate;
+  });
+  let filteredCompareRates =
+    compareRates.length > 0
+      ? compareRates.sort((a, b) => {
+          let firstRate = Number(a.Value.split(",").join("."));
+          let secondRate = Number(b.Value.split(",").join("."));
+          return secondRate - firstRate;
+        })
+      : "";
   return {
     type: TO_LOWEST,
+    payload: {
+      rates: filteredRates,
+      compareRates: filteredCompareRates,
+    },
   };
 }
 
-export function filterToHighest() {
+export function filterToHighest(rates, compareRates) {
+  let filteredRates = rates.sort((a, b) => {
+    let firstRate = Number(a.Value.split(",").join("."));
+    let secondRate = Number(b.Value.split(",").join("."));
+    return firstRate - secondRate;
+  });
+  let filteredCompareRates =
+    compareRates.length > 0
+      ? compareRates.sort((a, b) => {
+          let firstRate = Number(a.Value.split(",").join("."));
+          let secondRate = Number(b.Value.split(",").join("."));
+          return firstRate - secondRate;
+        })
+      : "";
   return {
     type: TO_HIGHEST,
+    payload: {
+      rates: filteredRates,
+      compareRates: filteredCompareRates,
+    },
   };
 }
 
@@ -257,9 +292,33 @@ export function cleanFilter() {
   };
 }
 
-export function alphabetFilter() {
+export function alphabetFilter(rates, compareRates) {
+  let filteredRates = rates.sort((a, b) => {
+    if (a.CharCode < b.CharCode) {
+      return -1;
+    }
+    if (a.CharCode > b.CharCode) {
+      return 1;
+    }
+    return 0;
+  });
+
+  let filteredCompareRates = compareRates && compareRates.sort((a, b) => {
+    if (a.CharCode < b.CharCode) {
+      return -1;
+    }
+    if (a.CharCode > b.CharCode) {
+      return 1;
+    }
+    return 0;
+  });
+
   return {
     type: ALPHABET_FILTER,
+    payload: {
+      rates: filteredRates,
+      compareRates: filteredCompareRates,
+    },
   };
 }
 

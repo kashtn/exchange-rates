@@ -65,69 +65,87 @@ export default function reducer(state = initialState, action) {
     case TO_HIGHEST:
       return {
         ...state,
-        rates: [
-          ...state.rates.sort((a, b) => {
-            let firstRate = Number(a.Value.split(",").join("."));
-            let secondRate = Number(b.Value.split(",").join("."));
-            return firstRate - secondRate;
-          }),
-        ],
-        compareRates: [
-          ...(state.compareRates.length > 0
-            ? state.compareRates.sort((a, b) => {
-                let firstRate = Number(a.Value.split(",").join("."));
-                let secondRate = Number(b.Value.split(",").join("."));
-                return firstRate - secondRate;
-              })
-            : ""),
-        ],
+        rates: action.payload.rates,
+        compareRates: action.payload.compareRates,
       };
+    // case TO_HIGHEST:
+    //   return {
+    //     ...state,
+    //     rates: [
+    //       ...state.rates.sort((a, b) => {
+    //         let firstRate = Number(a.Value.split(",").join("."));
+    //         let secondRate = Number(b.Value.split(",").join("."));
+    //         return firstRate - secondRate;
+    //       }),
+    //     ],
+    //     compareRates: [
+    //       ...(state.compareRates.length > 0
+    //         ? state.compareRates.sort((a, b) => {
+    //             let firstRate = Number(a.Value.split(",").join("."));
+    //             let secondRate = Number(b.Value.split(",").join("."));
+    //             return firstRate - secondRate;
+    //           })
+    //         : ""),
+    //     ],
+    //   };
     case TO_LOWEST:
       return {
         ...state,
-        rates: [
-          ...state.rates.sort((a, b) => {
-            let firstRate = Number(a.Value.split(",").join("."));
-            let secondRate = Number(b.Value.split(",").join("."));
-            return secondRate - firstRate;
-          }),
-        ],
-        compareRates: [
-          ...(state.compareRates.length > 0
-            ? state.compareRates.sort((a, b) => {
-                let firstRate = Number(a.Value.split(",").join("."));
-                let secondRate = Number(b.Value.split(",").join("."));
-                return secondRate - firstRate;
-              })
-            : ""),
-        ],
+        rates: action.payload.rates,
+        compareRates: action.payload.compareRates,
       };
+    // case TO_LOWEST:
+    //   return {
+    //     ...state,
+    //     rates: [
+    //       ...state.rates.sort((a, b) => {
+    //         let firstRate = Number(a.Value.split(",").join("."));
+    //         let secondRate = Number(b.Value.split(",").join("."));
+    //         return secondRate - firstRate;
+    //       }),
+    //     ],
+    //     compareRates: [
+    //       ...(state.compareRates.length > 0
+    //         ? state.compareRates.sort((a, b) => {
+    //             let firstRate = Number(a.Value.split(",").join("."));
+    //             let secondRate = Number(b.Value.split(",").join("."));
+    //             return secondRate - firstRate;
+    //           })
+    //         : ""),
+    //     ],
+    //   };
     case ALPHABET_FILTER:
       return {
         ...state,
-        rates: [
-          ...state.rates.sort((a, b) => {
-            if (a.CharCode < b.CharCode) {
-              return -1;
-            }
-            if (a.CharCode > b.CharCode) {
-              return 1;
-            }
-            return 0;
-          }),
-        ],
-        compareRates: [
-          ...state.compareRates.sort((a, b) => {
-            if (a.CharCode < b.CharCode) {
-              return -1;
-            }
-            if (a.CharCode > b.CharCode) {
-              return 1;
-            }
-            return 0;
-          }),
-        ],
+        rates: action.payload.rates,
+        compareRates: action.payload.compareRates,
       };
+    // case ALPHABET_FILTER:
+    //   return {
+    //     ...state,
+    //     rates: [
+    //       ...state.rates.sort((a, b) => {
+    //         if (a.CharCode < b.CharCode) {
+    //           return -1;
+    //         }
+    //         if (a.CharCode > b.CharCode) {
+    //           return 1;
+    //         }
+    //         return 0;
+    //       }),
+    //     ],
+    //     compareRates: [
+    //       ...state.compareRates.sort((a, b) => {
+    //         if (a.CharCode < b.CharCode) {
+    //           return -1;
+    //         }
+    //         if (a.CharCode > b.CharCode) {
+    //           return 1;
+    //         }
+    //         return 0;
+    //       }),
+    //     ],
+    //   };
     case CLEAN_FILTER:
       return {
         ...state,
