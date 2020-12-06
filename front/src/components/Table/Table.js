@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   startGetting,
   setCurrentDate,
+  setCurrentCompareDate,
   setFilter,
   filterToHighest,
   filterToLowest,
@@ -41,6 +42,7 @@ function TableCard() {
   const [selectedCompareDate2, setSelectedCompareDate2] = useState("");
   const [selectedChar, setSelectedChar] = useState("");
   const [selectedCompareChar, setSelectedCompareChar] = useState("");
+  const [searchCalendar, setSearchCalendar] = useState(false);
 
   let newArr = [];
   let current =
@@ -113,7 +115,7 @@ function TableCard() {
             dispatch(setFilter("toLowest"));
           }}
         >
-          Фильтр по убыванию
+          По убыванию
         </Button>
       </div>
       <div>
@@ -124,7 +126,7 @@ function TableCard() {
             dispatch(setFilter("toHighest"));
           }}
         >
-          Фильтр по возрастанию
+          По возрастанию
         </Button>
       </div>
       <div>
@@ -136,7 +138,7 @@ function TableCard() {
             dispatch(alphabetFilter(reduxRates, reduxCompareRates));
           }}
         >
-          Фильтр по алфавиту
+          По алфавиту
         </Button>
       </div>
     </>
@@ -218,7 +220,50 @@ function TableCard() {
     setSelectedChar("");
   }
 
+  useEffect(() => {
+    if (currentDate && selectedDate && currentDate !== selectedDate) {
+      Modal.info({
+        title: "Запрошеной даты нет в архиве, будет показана ближайшая.",
+      });
+    }
+  }, [currentDate]);
+
+  const [modalError, setmodalError] = useState(false);
+
+  useEffect(() => {
+    if (
+      currentDate &&
+      selectedCompareDate1 &&
+      currentDate !== selectedCompareDate1
+    ) {
+      setmodalError(true);
+      Modal.info({
+        title:
+          "*Дата 1* Запрошеной даты нет в архиве, будет показана ближайшая.",
+      });
+    } else if (currentDate === selectedCompareDate1) {
+      setmodalError(false);
+    }
+  }, [currentDate]);
+
+  useEffect(() => {
+    if (
+      currentCompareDate &&
+      selectedCompareDate2 &&
+      currentCompareDate !== selectedCompareDate2 &&
+      !modalError
+    ) {
+      Modal.info({
+        title:
+          "*Дата 2* Запрошеной даты нет в архиве, будет показана ближайшая.",
+      });
+    }
+  }, [currentCompareDate]);
+
   function onSearch(values) {
+    // dispatch(setCurrentCompareDate(''))
+    setSelectedCompareDate1("");
+    setSelectedCompareDate2("");
     if (selectedDate) {
       let dateArr = selectedDate.split("/");
       let dateChange = [dateArr[1], dateArr[0], dateArr[2]];
@@ -253,6 +298,9 @@ function TableCard() {
         dateFormatterToNewDate(selectedCompareDate1) <
         dateFormatterToNewDate(selectedCompareDate2)
       ) {
+        setSelectedDate("");
+        dispatch(setCurrentDate(""));
+        dispatch(setCurrentCompareDate(""));
         setVisible(false);
         dispatch(startGetting(selectedCompareDate1, selectedCompareDate2));
         setCompareFlag(true);
@@ -327,7 +375,7 @@ function TableCard() {
 
   const contentCalendar = (
     <div className="site-calendar-demo-card">
-      <Calendar fullscreen={false} onChange={onSearchChange} />
+      <Calendar fullscreen={false} onSelect={onSearchChange} />
     </div>
   );
   const contentCompareCalendar1 = (
@@ -343,7 +391,8 @@ function TableCard() {
 
   function onSearchChange(value) {
     setSelectedDate(dateFormatterFromNewDate(value._d));
-    dispatch(setCurrentDate(dateFormatterFromNewDate(value._d)));
+    // dispatch(setCurrentDate(dateFormatterFromNewDate(value._d)));
+    // setSearchCalendar(false)
   }
   function onCompareChange1(value) {
     setSelectedCompareDate1(dateFormatterFromNewDate(value._d));
@@ -385,8 +434,17 @@ function TableCard() {
                 compareCharCode: "Все",
               }}
             >
-              <Popover content={contentCalendar} trigger="click">
-                <Button>Выбрать дату</Button>
+              <Popover
+                // visible={searchCalendar}
+                content={contentCalendar}
+                trigger="click"
+                // onVisibleChange={handleVisibleChange}
+              >
+                <Button
+                // onClick={() => {setSearchCalendar(true)}}
+                >
+                  Выбрать дату
+                </Button>
               </Popover>
               <Form.Item label="Дата">
                 <p className="selectedDate">
@@ -481,7 +539,7 @@ function TableCard() {
         {!loading && visible && !selectedChar && (
           <>
             <Popover content={content} trigger="click">
-              <Button type="link">Фильтровать</Button>
+              <Button type="link">Сортировать</Button>
             </Popover>
             <div className="table">
               <h4>{currentDate}</h4>
@@ -493,7 +551,7 @@ function TableCard() {
         {!loading && compareFlag && (
           <>
             <Popover content={content} trigger="click">
-              <Button type="link">Фильтровать</Button>
+              <Button type="link">Сортировать</Button>
             </Popover>
             <div className="compareTable">
               <div></div>

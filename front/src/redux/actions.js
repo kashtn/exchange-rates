@@ -60,7 +60,6 @@ export function startGetting(date1, date2) {
     const url = `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date1}`;
     const response = await fetch("http://localhost:8080/" + url);
     // const response = await fetch("https://cors-anywhere.herokuapp.com/" + url);
-    dispatch(finishLoading());
     if (response.status !== 200) {
       const response = await fetch("/getCurrentDay", {
         method: "POST",
@@ -102,8 +101,8 @@ export function startGetting(date1, date2) {
       const currentDate = xmlToJson(XmlNode)
         .ValCurs["@attributes"].Date.split(".")
         .join("/");
-      setTimeout(async () => {
         dispatch(setCurrentDate(currentDate));
+      setTimeout(async () => {
         dispatch(finishLoading());
       }, 500);
     }
@@ -303,15 +302,17 @@ export function alphabetFilter(rates, compareRates) {
     return 0;
   });
 
-  let filteredCompareRates = compareRates && compareRates.sort((a, b) => {
-    if (a.CharCode < b.CharCode) {
-      return -1;
-    }
-    if (a.CharCode > b.CharCode) {
-      return 1;
-    }
-    return 0;
-  });
+  let filteredCompareRates =
+    compareRates &&
+    compareRates.sort((a, b) => {
+      if (a.CharCode < b.CharCode) {
+        return -1;
+      }
+      if (a.CharCode > b.CharCode) {
+        return 1;
+      }
+      return 0;
+    });
 
   return {
     type: ALPHABET_FILTER,
