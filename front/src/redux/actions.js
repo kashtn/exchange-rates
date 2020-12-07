@@ -96,7 +96,6 @@ export function startGetting(date1, date2) {
           id: el["@attributes"].ID,
         };
       });
-      console.log(charCodes);
       dispatch(getCharCodes(charCodes));
       const currentDate = xmlToJson(XmlNode)
         .ValCurs["@attributes"].Date.split(".")
