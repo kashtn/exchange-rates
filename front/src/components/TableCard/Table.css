@@ -58,10 +58,31 @@
 [data-theme="dark"] .site-calendar-demo-card {
   border: 1px solid #303030;
 }
-.selectedDate{
+.selectedDate {
   margin-right: 50px;
 }
-.select{
+.select {
   position: relative;
   right: 6%;
+}
+.close {
+  position: relative;
+  left: 90%;
+}
+.closeBtn {
+  color: #ccc;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  transition: 0.4s;
+}
+.closeBtn:hover {
+  color: black;
+}
+.closeBtn:active {
+  color: #ccc;
+}
+.chooseDateBtn {
+  position: relative;
+  left: 50%;
+  transform: translate(-50%);
 }

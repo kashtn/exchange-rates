@@ -1,4 +1,4 @@
-import TableCard from "../Table/TableCard";
+import TableCard from "../TableCard/TableCard";
 import "./App.css";
 
 function App() {
