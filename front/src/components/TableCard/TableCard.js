@@ -1,6 +1,6 @@
 import "./Table.css";
 import "antd/dist/antd.css";
-import { useState, useEffect } from "react";
+import { useEffect, useReducer } from "react";
 import { Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -18,9 +18,20 @@ import SearchForm from "./SearchForm";
 import SortButton from "./SortButton";
 import TableComponent from "./TableComponent";
 import SaveButton from "./SaveButton";
+import reducer from "../reducer";
 
 function TableCard() {
   const dispatch = useDispatch();
+  const initialState = {
+    visible: false,
+    compareFlag: false,
+    dynamicFlag: false,
+    currentCharCode: "",
+    selectedChar: "",
+    selectedCompareChar: "",
+    searchFlag: false,
+  };
+  const [state, localDispatch] = useReducer(reducer, initialState);
 
   const reduxRates = useSelector((state) => state.rates);
   const reduxCompareRates = useSelector((state) => state.compareRates);
@@ -29,19 +40,11 @@ function TableCard() {
   const loading = useSelector((state) => state.loading);
   const filter = useSelector((state) => state.filter);
 
-  const [visible, setVisible] = useState(false);
-  const [compareFlag, setCompareFlag] = useState(false);
-  const [dynamicFlag, setDynamicFlag] = useState(false);
-  const [currentCharCode, setCurrentCharCode] = useState("");
-  const [selectedChar, setSelectedChar] = useState("");
-  const [selectedCompareChar, setSelectedCompareChar] = useState("");
-  const [searchFlag, setSearchFlag] = useState(false);
-
   let newArr = [];
   let current =
-    selectedChar && selectedChar !== "Все" && reduxRates
+    state.selectedChar && state.selectedChar !== "Все" && reduxRates
       ? reduxRates.find((rate) => {
-          if (rate["@attributes"].ID === selectedChar) {
+          if (rate["@attributes"].ID === state.selectedChar) {
             return rate;
           } else return "";
         })
@@ -50,9 +53,11 @@ function TableCard() {
 
   let newArr2 = [];
   let newCurrent =
-    selectedCompareChar && selectedCompareChar !== "Все" && reduxRates
+    state.selectedCompareChar &&
+    state.selectedCompareChar !== "Все" &&
+    reduxRates
       ? reduxRates.find((rate) => {
-          if (rate["@attributes"].ID === selectedCompareChar) {
+          if (rate["@attributes"].ID === state.selectedCompareChar) {
             return rate;
           } else return "";
         })
@@ -61,9 +66,11 @@ function TableCard() {
 
   let newCompareArr = [];
   let currentCompare =
-    selectedCompareChar && selectedCompareChar !== "Все" && reduxCompareRates
+    state.selectedCompareChar &&
+    state.selectedCompareChar !== "Все" &&
+    reduxCompareRates
       ? reduxCompareRates.find((rate) => {
-          if (rate["@attributes"].ID === selectedCompareChar) {
+          if (rate["@attributes"].ID === state.selectedCompareChar) {
             return rate;
           } else return "";
         })
@@ -80,43 +87,15 @@ function TableCard() {
 
   useEffect(() => {
     dispatch(startGetting(""));
-    setVisible(true);
+    localDispatch({
+      type: "setVisible",
+      payload: true,
+    });
   }, [dispatch]);
 
-  function setSearchFlagFunc(bool) {
-    setSearchFlag(bool);
-  }
-  function setVisibleFunc(bool) {
-    setVisible(bool);
-  }
-  function setDynamicFlagFunc(bool) {
-    setDynamicFlag(bool);
-  }
-  function setSelectedCharFunc(value) {
-    setSelectedChar(value);
-  }
-  function setSelectedCompareCharFunc(value) {
-    setSelectedCompareChar(value);
-  }
-  function setCompareFlagFunc(bool) {
-    setCompareFlag(bool);
-  }
-  function setCurrentCharCodeFunc(value) {
-    setCurrentCharCode(value);
-  }
   return (
     <>
-      <Context.Provider
-        value={{
-          setDynamicFlagFunc,
-          setSelectedCharFunc,
-          setSelectedCompareCharFunc,
-          setVisibleFunc,
-          setCompareFlagFunc,
-          setSearchFlagFunc,
-          setCurrentCharCodeFunc,
-        }}
-      >
+      <Context.Provider value={{ localDispatch }}>
         <div className="main">
           <GetBase />
           <div>
@@ -124,68 +103,81 @@ function TableCard() {
             <Button
               type="primary"
               onClick={() => {
-                setSearchFlag(true);
+                localDispatch({
+                  type: "setSearchFlag",
+                  payload: true,
+                });
+                localDispatch({
+                  type: "setVisible",
+                  payload: true,
+                });
+                localDispatch({
+                  type: "setDynamicFlag",
+                  payload: false,
+                });
+                localDispatch({
+                  type: "setCompareFlag",
+                  payload: false,
+                });
                 dispatch(startGetting(""));
                 dispatch(cleanFilter());
                 dispatch(setCompareRates([]));
-                setVisible(true);
-                setDynamicFlag(false);
-                setCompareFlag(false);
               }}
             >
               Показать на сегодня
             </Button>
           </div>
           <div name="dateForm" className="dateForm">
-            <SearchForm flag={searchFlag} />
-            <CompareForm flag={searchFlag} />
+            <SearchForm flag={state.searchFlag} />
+            <CompareForm flag={state.searchFlag} />
           </div>
           {loading && <div className="loader"></div>}
-
-          {!loading && selectedChar && (
+          {!loading && state.selectedChar && (
             <>
               <SortButton />
               <TableComponent
                 date={currentDate}
-                dataSource={selectedChar !== "Все" ? newArr : reduxRates}
-                visibleFlag={visible}
+                dataSource={state.selectedChar !== "Все" ? newArr : reduxRates}
+                visibleFlag={state.visible}
               />
             </>
           )}
-          {!loading && visible && !selectedChar && (
+          {!loading && state.visible && !state.selectedChar && (
             <>
               <SortButton />
               <TableComponent
                 date={currentDate}
                 dataSource={reduxRates && reduxRates}
-                visibleFlag={visible}
+                visibleFlag={state.visible}
               />
             </>
           )}
-          {dynamicFlag && <Graph charCode={currentCharCode} />}
-          {!loading && compareFlag && (
+          {state.dynamicFlag && <Graph charCode={state.currentCharCode} />}
+          {!loading && state.compareFlag && (
             <>
               <SortButton />
               <div className="compareTable">
                 <TableComponent
                   date={currentDate}
-                  dataSource={selectedCompareChar ? newArr2 : reduxRates}
-                  visibleFlag={visible}
+                  dataSource={state.selectedCompareChar ? newArr2 : reduxRates}
+                  visibleFlag={state.visible}
                 />
                 <TableComponent
                   date={currentCompareDate}
                   dataSource={
-                    selectedCompareChar ? newCompareArr : reduxCompareRates
+                    state.selectedCompareChar
+                      ? newCompareArr
+                      : reduxCompareRates
                   }
-                  visibleFlag={visible}
+                  visibleFlag={state.visible}
                 />
               </div>
             </>
           )}
-          {!loading && (visible || compareFlag) && (
+          {!loading && (state.visible || state.compareFlag) && (
             <SaveButton
-              selectedChar={selectedChar}
-              selectedCompareChar={selectedCompareChar}
+              selectedChar={state.selectedChar}
+              selectedCompareChar={state.selectedCompareChar}
               newArr={newArr}
               newArr2={newArr2}
               newCompareArr={newCompareArr}

@@ -6,7 +6,7 @@ import { Context } from "../../context";
 
 export default function TableComponent(props) {
   const dispatch = useDispatch();
-  const { setDynamicFlagFunc, setCurrentCharCodeFunc } = useContext(Context);
+  const { localDispatch } = useContext(Context);
 
   const reduxRates = useSelector((state) => state.rates);
   const currentDate = useSelector((state) => state.currentDate);
@@ -40,10 +40,12 @@ export default function TableComponent(props) {
       dataIndex: "Value",
     },
   ];
-
   function findDynamic(e) {
     if (!props.visibleFlag) {
-      setCurrentCharCodeFunc(e.target.innerText);
+      localDispatch({
+        type: "setCurrentCharCode",
+        payload: e.target.innerText,
+      });
       const currencyName = e.target.innerText;
       try {
         const currencyId = reduxRates.find(
@@ -51,7 +53,10 @@ export default function TableComponent(props) {
         );
         const id = Object.values(currencyId["@attributes"])[0];
         dispatch(getDynamic(id, currentDate, currentCompareDate, currencyName));
-        setDynamicFlagFunc(true);
+        localDispatch({
+          type: "setDynamicFlag",
+          payload: true,
+        });
       } catch (err) {
         Modal.error({
           title: "Невозможно показать динамику данной валюты!",
@@ -63,7 +68,6 @@ export default function TableComponent(props) {
       });
     }
   }
-
   return (
     <>
       <div className="table">

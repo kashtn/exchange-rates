@@ -73,7 +73,7 @@ function GetBase() {
       return rates;
     }
   }
-
+  let allRatesToSave = [];
   async function getBaseRates() {
     setChecking(true);
     setIsModalVisible(true);
@@ -138,6 +138,15 @@ function GetBase() {
       async function request(dayTo, monthTo, yearTo) {
         let currentDayRates = await getDay(dayTo, monthTo, yearTo);
         console.log(`DAY = ${dayTo}`);
+        let existingRates = allRatesToSave.find((day) => {
+          if (day["@attributes"].Date === currentDayRates["@attributes"].Date) {
+            return true;
+          } else return false;
+        });
+        if (!existingRates) {
+          allRatesToSave.push(currentDayRates);
+        }
+
         let response = await fetch("/setBase", {
           method: "POST",
           headers: {
@@ -147,33 +156,41 @@ function GetBase() {
         });
         let result;
         result = await response.json();
-        if (result === "ok") {
-          let dayForReq;
-          if (day < 30) {
-            day += 1;
-            if (String(day).length === 1) {
-              dayForReq = "0" + day;
-              request(dayForReq, monthForReq, year);
-            } else if (String(day).length === 2) {
-              dayForReq = String(day);
-              request(dayForReq, monthForReq, year);
-            }
+
+        let dayForReq;
+        if (day < 30) {
+          day += 1;
+          if (String(day).length === 1) {
+            dayForReq = "0" + day;
+            request(dayForReq, monthForReq, year);
+          } else if (String(day).length === 2) {
+            dayForReq = String(day);
+            request(dayForReq, monthForReq, year);
+          }
+        } else {
+          monthForReq = "0" + (Number(monthForReq) + 1);
+          console.log(`MONTH = ${Number(monthForReq)}`);
+          if (Number(monthForReq) < 10) {
+            day = 1;
+            request("0" + day, monthForReq, year);
+          } else if (Number(monthForReq) >= 10 && Number(monthForReq) < 13) {
+            monthForReq = String(Number(monthForReq));
+            console.log(monthForReq);
+            day = 1;
+            request("0" + day, monthForReq, year);
           } else {
-            monthForReq = "0" + (Number(monthForReq) + 1);
-            console.log(`MONTH = ${Number(monthForReq)}`);
-            if (Number(monthForReq) < 10) {
-              day = 1;
-              request("0" + day, monthForReq, year);
-            } else if (Number(monthForReq) >= 10 && Number(monthForReq) < 13) {
-              monthForReq = String(Number(monthForReq));
-              console.log(monthForReq);
-              day = 1;
-              request("0" + day, monthForReq, year);
-            } else {
-              setChecking(false);
-              setBaseIsLoaded(true);
-              console.log("Base is loaded!");
-            }
+            setChecking(false);
+            setBaseIsLoaded(true);
+            console.log("Base is loaded!");
+            // let response = await fetch("/setBase", {
+            //     method: "POST",
+            //     headers: {
+            //       "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify(allRatesToSave),
+            //   });
+            //   let result = await response.json();
+            console.log(allRatesToSave);
           }
         }
       }

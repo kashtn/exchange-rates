@@ -26,6 +26,7 @@ app.listen(PORT, () => {
 app.post("/setBase", async (req, res) => {
   console.log("server");
   let base = req.body;
+  console.log(base); 
   let date = base && base["@attributes"].Date;
   let attributes = base["@attributes"];
   const thisDay = await Day.findOne({ date });

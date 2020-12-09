@@ -25,13 +25,7 @@ const { Option } = Select;
 export default function SearchForm(props) {
   const dispatch = useDispatch();
 
-  const {
-    setDynamicFlagFunc,
-    setSelectedCharFunc,
-    setVisibleFunc,
-    setCompareFlagFunc,
-    setSearchFlagFunc,
-  } = useContext(Context);
+  const { localDispatch } = useContext(Context);
 
   const reduxRates = useSelector((state) => state.rates);
   const currentDate = useSelector((state) => state.currentDate);
@@ -160,27 +154,42 @@ export default function SearchForm(props) {
   }, [currentDate]);
 
   function onSearch(values) {
-    setSearchFlagFunc(true);
+    localDispatch({
+      type: "setSearchFlag",
+      payload: true,
+    });
     if (selectedDate) {
       let dateArr = selectedDate.split("/");
       let dateChange = [dateArr[1], dateArr[0], dateArr[2]];
       let dateResult = new Date(dateChange.join("."));
       if (dateResult < new Date()) {
-        setDynamicFlagFunc(false);
-        setSelectedCharFunc(values.charCode);
+        localDispatch({
+          type: "setDynamicFlag",
+          payload: false,
+        });
+        localDispatch({
+          type: "setVisible",
+          payload: true,
+        });
+        localDispatch({
+          type: "setCompareFlag",
+          payload: false,
+        });
+        localDispatch({
+          type: "setSelectedChar",
+          payload: values.charCode,
+        });
         dispatch(cleanFilter());
-        setVisibleFunc(true);
-        setCompareFlagFunc(false);
         dispatch(startGetting(selectedDate));
         dispatch(setCompareRates([]));
       } else {
         Modal.error({
-          title: "Некорректный ввод!",
+          title: "Неверная дата!",
         });
       }
     } else {
       Modal.error({
-        title: "Некорректный ввод!",
+        title: "Не выбрана дата!",
       });
     }
   }

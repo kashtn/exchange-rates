@@ -27,14 +27,7 @@ const { Option } = Select;
 export default function CompareForm(props) {
   const dispatch = useDispatch();
 
-  const {
-    setDynamicFlagFunc,
-    setSelectedCharFunc,
-    setSelectedCompareCharFunc,
-    setVisibleFunc,
-    setCompareFlagFunc,
-    setSearchFlagFunc,
-  } = useContext(Context);
+  const { localDispatch } = useContext(Context);
 
   const reduxRates = useSelector((state) => state.rates);
   const currentDate = useSelector((state) => state.currentDate);
@@ -239,7 +232,6 @@ export default function CompareForm(props) {
     </>
   );
   const [modalError, setmodalError] = useState(false);
-
   useEffect(() => {
     if (props.flag) {
       setSelectedCompareDate1("");
@@ -260,7 +252,6 @@ export default function CompareForm(props) {
       setmodalError(false);
     }
   }, [currentDate]);
-
   useEffect(() => {
     if (
       currentCompareDate &&
@@ -274,20 +265,30 @@ export default function CompareForm(props) {
       });
     }
   }, [currentCompareDate]);
-
   function onCompareChange1(value) {
     setSelectedCompareDate1(dateFormatterFromNewDate(value._d));
   }
   function onCompareChange2(value) {
     setSelectedCompareDate2(dateFormatterFromNewDate(value._d));
   }
-
   async function compare(values) {
-    setSearchFlagFunc(false);
-    setDynamicFlagFunc(false);
-    setSelectedCharFunc("");
+    localDispatch({
+      type: "setSearchFlag",
+      payload: false,
+    });
+    localDispatch({
+      type: "setDynamicFlagFunc",
+      payload: false,
+    });
+    localDispatch({
+      type: "setSelectedChar",
+      payload: "",
+    });
     dispatch(cleanFilter());
-    setSelectedCompareCharFunc(values.compareCharCode);
+    localDispatch({
+      type: "setSelectedCompareChar",
+      payload: values.compareCharCode,
+    });
     if (selectedCompareDate1 && selectedCompareDate2) {
       if (
         dateFormatterToNewDate(selectedCompareDate1) <
@@ -295,9 +296,15 @@ export default function CompareForm(props) {
       ) {
         dispatch(setCurrentDate(""));
         dispatch(setCurrentCompareDate(""));
-        setVisibleFunc(false);
+        localDispatch({
+          type: "setVisible",
+          payload: false,
+        });
         dispatch(startGetting(selectedCompareDate1, selectedCompareDate2));
-        setCompareFlagFunc(true);
+        localDispatch({
+          type: "setCompareFlag",
+          payload: true,
+        });
       } else {
         Modal.error({
           title: "Неправильно заданы даты!",
@@ -309,14 +316,12 @@ export default function CompareForm(props) {
       });
     }
   }
-
   function hideCalendar1() {
     setCalendarVisible1(false);
   }
   function handleVisibleChange1(calendarVisible1) {
     setCalendarVisible1({ calendarVisible1 });
   }
-
   function hideCalendar2() {
     setCalendarVisible2(false);
   }
