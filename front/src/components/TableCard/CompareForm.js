@@ -28,10 +28,8 @@ export default function CompareForm(props) {
   const dispatch = useDispatch();
 
   const { localDispatch } = useContext(Context);
-
-  const reduxRates = useSelector((state) => state.rates);
-  const currentDate = useSelector((state) => state.currentDate);
-  const currentCompareDate = useSelector((state) => state.currentCompareDate);
+  
+  const {reduxRates,currentDate,currentCompareDate} = useSelector(state => state)
 
   const [selectedCompareDate1, setSelectedCompareDate1] = useState("");
   const [selectedCompareDate2, setSelectedCompareDate2] = useState("");

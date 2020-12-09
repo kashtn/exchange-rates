@@ -16,8 +16,8 @@ import {
 
 let initialState = {
   loading: false,
-  rates: [],
-  compareRates: [],
+  reduxRates: [],
+  reduxCompareRates: [],
   currentDate: "",
   currentCompareDate: "",
   filter: "",
@@ -40,7 +40,7 @@ export default function reducer(state = initialState, action) {
     case GET_RATES:
       return {
         ...state,
-        rates: action.payload,
+        reduxRates: action.payload,
       };
     case SET_CURRENT_DATE:
       return {
@@ -50,7 +50,7 @@ export default function reducer(state = initialState, action) {
     case GET_COMPARE_RATES:
       return {
         ...state,
-        compareRates: action.payload,
+        reduxCompareRates: action.payload,
       };
     case SET_CURRENT_COMPARE_DATE:
       return {
@@ -65,20 +65,20 @@ export default function reducer(state = initialState, action) {
     case TO_HIGHEST:
       return {
         ...state,
-        rates: [...action.payload.rates],
-        compareRates: [...action.payload.compareRates],
+        reduxRates: [...action.payload.rates],
+        reduxCompareRates: [...action.payload.compareRates],
       };
     case TO_LOWEST:
       return {
         ...state,
-        rates: [...action.payload.rates],
-        compareRates: [...action.payload.compareRates],
+        reduxRates: [...action.payload.rates],
+        reduxCompareRates: [...action.payload.compareRates],
       };
     case ALPHABET_FILTER:
       return {
         ...state,
-        rates: [...action.payload.rates],
-        compareRates: [...action.payload.compareRates],
+        reduxRates: [...action.payload.rates],
+        reduxCompareRates: [...action.payload.compareRates],
       };
     case CLEAN_FILTER:
       return {

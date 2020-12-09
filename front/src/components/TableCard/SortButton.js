@@ -5,8 +5,7 @@ import { setFilter, cleanFilter, alphabetFilter } from "../../redux/actions";
 export default function SortButton() {
   const dispatch = useDispatch();
 
-  const reduxRates = useSelector((state) => state.rates);
-  const reduxCompareRates = useSelector((state) => state.compareRates);
+  const {reduxRates, reduxCompareRates} = useSelector(state => state)
 
   const content = (
     <>

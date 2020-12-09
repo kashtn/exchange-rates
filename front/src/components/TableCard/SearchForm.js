@@ -27,12 +27,13 @@ export default function SearchForm(props) {
 
   const { localDispatch } = useContext(Context);
 
-  const reduxRates = useSelector((state) => state.rates);
-  const currentDate = useSelector((state) => state.currentDate);
+  const {reduxRates, currentDate} = useSelector(state => state)
 
   const [selectedDate, setSelectedDate] = useState("");
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [form] = Form.useForm();
+
+  const todayYear = new Date().getFullYear();
 
   const layout = {
     labelCol: {
@@ -48,8 +49,6 @@ export default function SearchForm(props) {
       span: 16,
     },
   };
-  let todayYear = new Date().getFullYear();
-
   const contentCalendar = (
     <>
       <div className="site-calendar-demo-card">
@@ -138,7 +137,6 @@ export default function SearchForm(props) {
       </Button>
     </>
   );
-
   useEffect(() => {
     setSelectedDate("");
     if (
@@ -152,7 +150,6 @@ export default function SearchForm(props) {
       });
     }
   }, [currentDate]);
-
   function onSearch(values) {
     localDispatch({
       type: "setSearchFlag",
@@ -193,19 +190,15 @@ export default function SearchForm(props) {
       });
     }
   }
-
   function onSearchChange(value) {
     setSelectedDate(dateFormatterFromNewDate(value._d));
   }
-
   function hideCalendar() {
     setCalendarVisible(false);
   }
-
   function handleVisibleChange(calendarVisible) {
     setCalendarVisible({ calendarVisible });
   }
-
   return (
     <>
       <div className="form">

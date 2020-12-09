@@ -22,7 +22,7 @@ import reducer from "../reducer";
 
 function TableCard() {
   const dispatch = useDispatch();
-  const initialState = {
+  const initialLocalState = {
     visible: false,
     compareFlag: false,
     dynamicFlag: false,
@@ -31,14 +31,14 @@ function TableCard() {
     selectedCompareChar: "",
     searchFlag: false,
   };
-  const [state, localDispatch] = useReducer(reducer, initialState);
-
-  const reduxRates = useSelector((state) => state.rates);
-  const reduxCompareRates = useSelector((state) => state.compareRates);
-  const currentDate = useSelector((state) => state.currentDate);
-  const currentCompareDate = useSelector((state) => state.currentCompareDate);
-  const loading = useSelector((state) => state.loading);
-  const filter = useSelector((state) => state.filter);
+  const [state, localDispatch] = useReducer(reducer, initialLocalState);
+let name = 'Ivan'
+console.log(name);
+console.log(typeof name);
+let mod = !!name
+console.log(mod);
+console.log(typeof mod);
+  const {reduxRates,reduxCompareRates,currentDate, currentCompareDate, loading, filter} = useSelector(state => state)
 
   let newArr = [];
   let current =

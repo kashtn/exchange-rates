@@ -8,9 +8,7 @@ export default function TableComponent(props) {
   const dispatch = useDispatch();
   const { localDispatch } = useContext(Context);
 
-  const reduxRates = useSelector((state) => state.rates);
-  const currentDate = useSelector((state) => state.currentDate);
-  const currentCompareDate = useSelector((state) => state.currentCompareDate);
+  const {reduxRates,currentDate,currentCompareDate} = useSelector(state => state)
 
   const dynamicContent = (
     <div>

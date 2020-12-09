@@ -123,9 +123,9 @@ export function startGetting(date1, date2) {
         if (result) {
           const rates = result.Valute;
           dispatch(setCompareRates(rates));
-          const charCodes = rates.map((el) => {
-            return el.CharCode;
-          });
+          // const charCodes = rates.map((el) => {
+          //   return el.CharCode;
+          // });
           // dispatch(getCharCodes(charCodes));
           const currentDate = result["@attributes"].Date.split(".").join("/");
           dispatch(setCurrentCompareDate(currentDate));
