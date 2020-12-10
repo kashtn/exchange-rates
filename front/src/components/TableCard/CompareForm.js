@@ -275,7 +275,7 @@ export default function CompareForm(props) {
       payload: false,
     });
     localDispatch({
-      type: "setDynamicFlagFunc",
+      type: "setDynamicFlag",
       payload: false,
     });
     localDispatch({

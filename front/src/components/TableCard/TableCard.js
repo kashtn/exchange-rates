@@ -32,12 +32,6 @@ function TableCard() {
     searchFlag: false,
   };
   const [state, localDispatch] = useReducer(reducer, initialLocalState);
-let name = 'Ivan'
-console.log(name);
-console.log(typeof name);
-let mod = !!name
-console.log(mod);
-console.log(typeof mod);
   const {reduxRates,reduxCompareRates,currentDate, currentCompareDate, loading, filter} = useSelector(state => state)
 
   let newArr = [];

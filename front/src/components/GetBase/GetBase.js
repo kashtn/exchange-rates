@@ -77,7 +77,6 @@ function GetBase() {
   async function getBaseRates() {
     setChecking(true);
     setIsModalVisible(true);
-    console.log("RUUUUUUNING>>>>>");
     let day = 1;
     let today = new Date();
     let month = today.getMonth() + 1;
@@ -107,7 +106,6 @@ function GetBase() {
         charCode
       ) {
         const url = `http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=${firstDate}&date_req2=${secondDate}&VAL_NM_RQ=${currencyId}`;
-        console.log("RUNNNNNNN>>>> DYNAMICCCCCCC>>>>");
         const response = await fetch("http://localhost:8080/" + url);
         if (response.status === 200) {
           setConnectionError(false);
